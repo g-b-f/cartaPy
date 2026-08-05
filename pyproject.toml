@@ -1,0 +1,20 @@
+[build-system]
+requires = ["maturin>=1.11,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "pyCarta"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dynamic = ["version"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "pytest-cov>=5.0.0",
+    "pytest-mock>=3.14.1",
+]

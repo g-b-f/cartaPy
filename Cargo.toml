@@ -1,0 +1,12 @@
+[package]
+name = "pycarta"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "_rust_wrapper"
+crate-type = ["cdylib"]
+
+[dependencies]
+carta = "0.0.8"
+pyo3 = "0.27.0"
