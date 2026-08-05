@@ -3,7 +3,7 @@ def convert_text(
         to_format:str,
         input_text:str
     ) -> str:
-    """converts text using Canta.
+    """converts text using Carta.
 
     Args:
         from_format (str): the format to be convert from

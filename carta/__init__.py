@@ -1,8 +1,12 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-import _rust_wrapper
+if TYPE_CHECKING:
+    from carta import _rust_wrapper # type: ignore[reportMissingModuleSource]
+else:
+    import _rust_wrapper
+
 from pathlib import Path
-
 
 @dataclass
 class From:

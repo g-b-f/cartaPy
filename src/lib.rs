@@ -11,7 +11,9 @@ fn convert_text(
     let reader_options = carta::ReaderOptions::default();
     let writer_options = carta::WriterOptions::default();
 
-    let ret = carta::convert_text(from_format, to_format, input_text, &reader_options, &writer_options);
+    let ret = carta::convert_text(
+        from_format,to_format, input_text, &reader_options, &writer_options
+    );
     return  ret.expect("unexpected result");
 }
 
