@@ -18,3 +18,18 @@ dev = [
     "pytest-cov>=5.0.0",
     "pytest-mock>=3.14.1",
 ]
+
+[tool.ruff.lint]
+extend-select = [
+    "BLE",  # Blind exceptions
+    "FBT",  # Boolean trap
+    "A",    # Builtin shadowing
+    "C4",   # Comprehensions
+    "LOG",  # Logging
+    "G",    # Logging formatting
+    "PT",   # Pytest
+    "SIM",  # Simplifications
+    "TID",  # Tidy imports
+    "I",    # isort
+    "C901", # flake8-c901 complexity
+]

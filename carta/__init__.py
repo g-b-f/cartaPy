@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from carta import _rust_wrapper # type: ignore[reportMissingModuleSource]
+    from carta import _rust_wrapper  # type: ignore[reportMissingModuleSource]
 else:
     import _rust_wrapper
 
@@ -38,7 +38,7 @@ class Text:
     def from_html(self):
         return From(self._text, "html")
 
-def convert(input: str|Path):
-    if isinstance(input, Path):
-        input = input.read_text()
-    return Text(input)
+def convert(to_convert: str | Path):
+    if isinstance(to_convert, Path):
+        to_convert = to_convert.read_text()
+    return Text(to_convert)
