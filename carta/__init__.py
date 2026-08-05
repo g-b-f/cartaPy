@@ -1,4 +1,7 @@
+# generated programmatically. Do not edit.
+
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -6,7 +9,6 @@ if TYPE_CHECKING:
 else:
     import _rust_wrapper
 
-from pathlib import Path
 
 @dataclass
 class From:
@@ -19,11 +21,10 @@ class From:
     @property
     def to_markdown(self):
         return self._convert("markdown")
-    
+
     @property
     def to_html(self):
         return self._convert("html")
-
 
 @dataclass
 class Text:
@@ -36,7 +37,6 @@ class Text:
     @property
     def from_html(self):
         return From(self._text, "html")
-
 
 def convert(input: str|Path):
     if isinstance(input, Path):
