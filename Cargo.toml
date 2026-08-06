@@ -2,6 +2,9 @@
 name = "cartapy"
 version = "0.1.0"
 edition = "2024"
+description = "Easy to use document converter"
+license = "MIT"
+repository = "https://github.com/g-b-f/cartapy"
 
 [lib]
 name = "_rust_wrapper"
