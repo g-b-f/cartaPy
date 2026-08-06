@@ -13,3 +13,10 @@ def convert_text(
     Returns:
         str: the converted text
     """
+
+
+def convert(
+        from_format:str,
+        to_format:str,
+        input_text:str
+    ) -> str | bytes: ...

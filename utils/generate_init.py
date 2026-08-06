@@ -5,7 +5,7 @@ tab2 = tab*2
 
 init_file = Path(__file__).parent.parent / "carta" / "__init__.py"
 
-formats = [
+formats = {
     "commonmark",
     "commonmark_x",
     "markdown",
@@ -41,7 +41,13 @@ formats = [
     "asciidoc",
     "beamer",
     "revealjs",
-]
+}
+
+input_only_formats = {"html5", "csv", "tsv"}
+output_only_formats: set[str] = set()
+
+output_formats = (formats - input_only_formats) | output_only_formats
+
 format_mapping_partial = {
     "github_markdown": "gfm",
     "jupyter": "ipynb",
@@ -49,7 +55,9 @@ format_mapping_partial = {
     "restructured_text": "rst",
 }
 
-format_mapping = {fmt:fmt for fmt in formats} | format_mapping_partial
+from_format_mapping = {fmt: fmt for fmt in sorted(formats)} | format_mapping_partial
+to_format_mapping = {fmt: fmt for fmt in sorted(output_formats)} | format_mapping_partial
+format_mapping = from_format_mapping
 
 
 
@@ -80,8 +88,8 @@ class From:
     _text: str
     from_fmt: str
 
-    def _convert(self, to:str) -> str:
-        return _rust_wrapper.convert_text(self.from_fmt, to, self._text)
+    def _convert(self, to:str) -> str | bytes:
+        return _rust_wrapper.convert(self.from_fmt, to, self._text)
 """
 ]
 
@@ -95,12 +103,13 @@ class Text:
 
 def main():
 
-    for friendly_name, internal_name in format_mapping.items():
+    for friendly_name, internal_name in to_format_mapping.items():
         from_class.append(f"{tab}@property")
         from_class.append(f"{tab}def to_{friendly_name}(self):")
         from_class.append(f'{tab2}return self._convert("{internal_name}")')
         from_class.append("")
 
+    for friendly_name, internal_name in from_format_mapping.items():
         text_class.append(f"{tab}@property")
         text_class.append(f"{tab}def from_{friendly_name}(self):")
         text_class.append(f'{tab2}return From(self._text, "{internal_name}")')
