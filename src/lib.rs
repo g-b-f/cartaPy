@@ -4,6 +4,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyString};
 use carta;
 
+
 fn build_options(
     wrap: Option<&str>,
     columns: Option<usize>,
@@ -34,24 +35,25 @@ fn build_options(
 
     let mut writer_options = carta::WriterOptions::default();
 
-    if let Some(ext_list) = extensions {
-        for ext_str in ext_list {
-            let (is_remove, clean_name) = if ext_str.starts_with('-') {
-                (true, &ext_str[1..])
-            } else if ext_str.starts_with('+') {
-                (false, &ext_str[1..])
-            } else {
-                (false, ext_str.as_str())
+    if let Some(extension_list) = extensions {
+        for extension in extension_list {
+            let (is_remove, clean_name) = if extension.starts_with('-') {
+                (true, &extension[1..])
+            }
+            else if extension.starts_with('+') {
+                (false, &extension[1..])
+            }
+            else {
+                (false, extension.as_str())
             };
 
-            if let Some(ext) = carta::Extension::from_name(clean_name) {
-                if is_remove {
-                    reader_options.extensions.remove(ext);
-                    writer_options.extensions.remove(ext);
-                } else {
-                    reader_options.extensions.insert(ext);
-                    writer_options.extensions.insert(ext);
-                }
+            let Some(ext) = carta::Extension::from_name(clean_name) else { continue };
+            if is_remove {
+                reader_options.extensions.remove(ext);
+                writer_options.extensions.remove(ext);
+            } else {
+                reader_options.extensions.insert(ext);
+                writer_options.extensions.insert(ext);
             }
         }
     }
@@ -70,13 +72,13 @@ fn build_options(
     writer_options.toc = toc;
     writer_options.toc_depth = toc_depth;
 
-    if let Some(mm) = math_method {
+    if let Some(math_meth) = math_method {
         let url = math_url.unwrap_or_default();
-        writer_options.math_method = match mm {
+        writer_options.math_method = match math_meth {
             "plain" => carta::MathMethod::Plain,
             "mathjax" => carta::MathMethod::MathJax(url),
             "katex" => carta::MathMethod::Katex(url),
-            _ => return Err(PyRuntimeError::new_err(format!("Invalid math method: {}", mm))),
+            _ => return Err(PyRuntimeError::new_err(format!("Invalid math method: {}", math_meth))),
         };
     }
 
