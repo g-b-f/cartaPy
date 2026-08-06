@@ -12,14 +12,51 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Test
+  check_version:
+    name: Check Version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: check_version
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Verify Cargo.toml version matches tag
+        env:
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          python -c "
+          from os import environ as env
+          import sys
+          import tomllib
+
+          if not env['GITHUB_REF'].startswith('refs/tags/v'):
+              print('Not a version tag push, skipping check')
+              sys.exit(0)
+            
+          tag_version = env['GITHUB_REF_NAME'].removeprefix('v')
+
+          with open('Cargo.toml', 'rb') as f:
+              data = tomllib.load(f)
+              cargo_version = data['package']['version']
+
+          if cargo_version != tag_version:
+              raise Exception(f'Cargo.toml version ({cargo_version}) does not match tag version ({tag_version})')
+
+          print(f'Cargo.toml version ({cargo_version}) matches tag ({ref_name})')
+          "
+
       - name: Install uv
         uses: astral-sh/setup-uv@v7
       - name: Run tests
