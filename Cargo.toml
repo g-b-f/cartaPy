@@ -8,5 +8,5 @@ name = "_rust_wrapper"
 crate-type = ["cdylib"]
 
 [dependencies]
-carta = { version = "0.0.8", features = ["read-csv", "write-csv", "read-tsv", "write-tsv"] }
+carta = { version = "0.0.8", features = ["read-csv", "read-tsv"] }
 pyo3 = "0.27.0"
