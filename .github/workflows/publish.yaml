@@ -61,40 +61,43 @@ jobs:
           name: wheels-linux-${{ matrix.platform.target }}
           path: dist
 
-  # test_install:
-  #     name: Test Install
-  #     runs-on: ubuntu-latest
-  #     needs: linux
-  #     steps:
-  #       - uses: actions/setup-python@v6
-  #         with:
-  #           python-version: '3.11'
+  test_install:
+      name: Test Install
+      runs-on: ubuntu-latest
+      needs: linux
+      steps:
+        - uses: actions/setup-python@v6
+          with:
+            python-version: '3.11'
 
-  #       - name: Download wheel
-  #         uses: actions/download-artifact@v4
-  #         with:
-  #           pattern: wheels-linux-*
-  #           path: dist/
-  #           merge-multiple: true
+        - name: Download wheel
+          uses: actions/download-artifact@v4
+          with:
+            pattern: wheels-linux-*
+            path: dist/
+            merge-multiple: true
 
-  #       - name: Install local wheel
-  #         run: pip install --no-index --find-links=dist/ pycarta
+        - name: Install local wheel
+          run: pip install --no-index --find-links=dist/ cartapy
 
-  #       - name: Import and smoke test
-  #         run: |
-  #           python -c '
-  #           from pycarta import ...
+        - name: Import and smoke test
+          run: |
+            python -c '
+            from carta import convert
 
-  #           expected="""
-  #           ...
-  #           """
-  #           # get `actual here`
-  #           assert actual == expected, f"unexpected format:\n\nexpected:\n{expected}\nactual:\n{actual}"
-  #           '
+            html = "<p><em>Hello</em> world!</p>"
+            markdown = "*Hello* world!"
+
+            expected_md = convert(html).from_html.to_markdown
+            expected_html = convert(markdown).from_markdown.to_html
+
+            assert expected_md == markdown, f"Expected: {markdown}, but got: {expected_md}"
+            assert expected_html == html, f"Expected: {html}, but got: {expected_html}"
+            '
 
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
-    # needs: test_install
+    needs: test_install
     strategy:
       matrix:
         platform:
@@ -126,7 +129,7 @@ jobs:
 
   windows:
     runs-on: ${{ matrix.platform.runner }}
-    # needs: test_install
+    needs: test_install
     strategy:
       matrix:
         platform:
@@ -159,7 +162,7 @@ jobs:
 
   macos:
     runs-on: ${{ matrix.platform.runner }}
-    # needs: test_install
+    needs: test_install
     strategy:
       matrix:
         platform:
@@ -186,7 +189,7 @@ jobs:
 
   android:
       runs-on: ubuntu-latest
-      # needs: test_install
+      needs: test_install
       strategy:
         matrix:
           platform:
@@ -212,7 +215,7 @@ jobs:
 
   sdist:
     runs-on: ubuntu-latest
-    # needs: test_install
+    needs: test_install
     steps:
       - uses: actions/checkout@v6
       - name: Build sdist
