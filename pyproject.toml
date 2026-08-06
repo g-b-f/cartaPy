@@ -33,3 +33,5 @@ extend-select = [
     "I",    # isort
     "C901", # flake8-c901 complexity
 ]
+[tool.pytest.ini_options]
+pythonpath = ["."]
