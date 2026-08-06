@@ -1,7 +1,11 @@
 import pytest
 
 from carta import convert
-from utils.generate_init import from_format_mapping, to_format_mapping
+from utils.generate_init import (
+    binary_output_formats,
+    from_format_mapping,
+    to_format_mapping,
+)
 
 html = "<p><em>Hello</em> world!</p>"
 markdown = "*Hello* world!"
@@ -34,3 +38,10 @@ def test_convert_html_to_markdown(markdown_format):
 def test_convert_markdown_to_html(markdown_format):
     ret = getattr(convert(markdown), f"from_{markdown_format}").to_html
     assert ret == html
+
+
+@pytest.mark.parametrize("binary_format", sorted(binary_output_formats))
+def test_convert_to_bytes(binary_format):
+    ret = getattr(convert(html).from_html, f"to_{binary_format}")
+    assert isinstance(ret, bytes)
+    assert len(ret) > 0

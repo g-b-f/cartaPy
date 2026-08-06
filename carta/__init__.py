@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from carta import _rust_wrapper  # type: ignore[reportMissingModuleSource]
+    from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
 else:
-    import _rust_wrapper
+    from . import _rust_wrapper
 
 
 @dataclass
@@ -15,152 +15,139 @@ class From:
     _text: str
     from_fmt: str
 
-    def _convert(self, to:str) -> str | bytes:
-        return _rust_wrapper.convert(self.from_fmt, to, self._text)
+    def _convert_text(self, to: str) -> str:
+        return _rust_wrapper.convert_text(self.from_fmt, to, self._text)
+
+    def _convert_bytes(self, to: str) -> bytes:
+        return _rust_wrapper.convert(self.from_fmt, to, self._text)  # type: ignore[return-value]
 
     @property
     def to_asciidoc(self):
-        return self._convert("asciidoc")
+        return self._convert_text("asciidoc")
 
     @property
     def to_beamer(self):
-        return self._convert("beamer")
+        return self._convert_text("beamer")
 
     @property
     def to_commonmark(self):
-        return self._convert("commonmark")
+        return self._convert_text("commonmark")
 
     @property
     def to_commonmark_x(self):
-        return self._convert("commonmark_x")
+        return self._convert_text("commonmark_x")
 
     @property
     def to_docx(self):
-        return self._convert("docx")
+        return self._convert_bytes("docx")
 
     @property
     def to_dokuwiki(self):
-        return self._convert("dokuwiki")
+        return self._convert_text("dokuwiki")
 
     @property
     def to_epub(self):
-        return self._convert("epub")
+        return self._convert_bytes("epub")
 
     @property
     def to_epub2(self):
-        return self._convert("epub2")
+        return self._convert_bytes("epub2")
 
     @property
     def to_epub3(self):
-        return self._convert("epub3")
+        return self._convert_bytes("epub3")
 
     @property
     def to_gfm(self):
-        return self._convert("gfm")
+        return self._convert_text("gfm")
 
     @property
     def to_html(self):
-        return self._convert("html")
+        return self._convert_text("html")
 
     @property
     def to_html4(self):
-        return self._convert("html4")
+        return self._convert_text("html4")
 
     @property
     def to_ipynb(self):
-        return self._convert("ipynb")
+        return self._convert_text("ipynb")
 
     @property
     def to_jira(self):
-        return self._convert("jira")
+        return self._convert_text("jira")
 
     @property
     def to_json(self):
-        return self._convert("json")
+        return self._convert_text("json")
 
     @property
     def to_latex(self):
-        return self._convert("latex")
+        return self._convert_text("latex")
 
     @property
     def to_man(self):
-        return self._convert("man")
+        return self._convert_text("man")
 
     @property
     def to_markdown(self):
-        return self._convert("markdown")
+        return self._convert_text("markdown")
 
     @property
     def to_markdown_github(self):
-        return self._convert("markdown_github")
+        return self._convert_text("markdown_github")
 
     @property
     def to_markdown_mmd(self):
-        return self._convert("markdown_mmd")
+        return self._convert_text("markdown_mmd")
 
     @property
     def to_markdown_phpextra(self):
-        return self._convert("markdown_phpextra")
+        return self._convert_text("markdown_phpextra")
 
     @property
     def to_markdown_strict(self):
-        return self._convert("markdown_strict")
+        return self._convert_text("markdown_strict")
 
     @property
     def to_mediawiki(self):
-        return self._convert("mediawiki")
+        return self._convert_text("mediawiki")
 
     @property
     def to_native(self):
-        return self._convert("native")
+        return self._convert_text("native")
 
     @property
     def to_odt(self):
-        return self._convert("odt")
+        return self._convert_bytes("odt")
 
     @property
     def to_opml(self):
-        return self._convert("opml")
+        return self._convert_text("opml")
 
     @property
     def to_org(self):
-        return self._convert("org")
+        return self._convert_text("org")
 
     @property
     def to_plain(self):
-        return self._convert("plain")
+        return self._convert_text("plain")
 
     @property
     def to_revealjs(self):
-        return self._convert("revealjs")
+        return self._convert_text("revealjs")
 
     @property
     def to_rst(self):
-        return self._convert("rst")
+        return self._convert_text("rst")
 
     @property
     def to_rtf(self):
-        return self._convert("rtf")
+        return self._convert_text("rtf")
 
     @property
     def to_typst(self):
-        return self._convert("typst")
-
-    @property
-    def to_github_markdown(self):
-        return self._convert("gfm")
-
-    @property
-    def to_jupyter(self):
-        return self._convert("ipynb")
-
-    @property
-    def to_jupyter_notebook(self):
-        return self._convert("ipynb")
-
-    @property
-    def to_restructured_text(self):
-        return self._convert("rst")
+        return self._convert_text("typst")
 
 @dataclass
 class Text:
@@ -305,22 +292,6 @@ class Text:
     @property
     def from_typst(self):
         return From(self._text, "typst")
-
-    @property
-    def from_github_markdown(self):
-        return From(self._text, "gfm")
-
-    @property
-    def from_jupyter(self):
-        return From(self._text, "ipynb")
-
-    @property
-    def from_jupyter_notebook(self):
-        return From(self._text, "ipynb")
-
-    @property
-    def from_restructured_text(self):
-        return From(self._text, "rst")
 
 def convert(to_convert: str | Path):
     if isinstance(to_convert, Path):
