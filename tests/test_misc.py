@@ -1,4 +1,4 @@
-from utils.generate_init import main, init_file
+from utils.generate_init import init_file, main
 
 
 def test_generate_init_has_been_run():

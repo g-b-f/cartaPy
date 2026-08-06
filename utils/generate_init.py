@@ -1,7 +1,9 @@
 from pathlib import Path
+from typing import Iterable
 
-tab = " "*4
-tab2 = tab*2
+tab = " " * 4
+tab2 = tab * 2
+tab3 = tab * 3
 
 init_file = Path(__file__).parent.parent / "carta" / "__init__.py"
 
@@ -49,23 +51,30 @@ format_mapping_extras = {
     "jupyter_notebook": "ipynb",
     "restructured_text": "rst",
 }
+
 binary_output_formats = {"docx", "epub", "epub2", "epub3", "odt"}
+epub_formats = {"epub", "epub2", "epub3"}
+docx_formats = {"docx"}
 input_only_formats = {"html5", "csv", "tsv"}
 output_only_formats: set[str] = set()
 
+
 def get_format_mapping(includes: set[str], excludes: set[str]):
     format_set = (formats - excludes) | includes
-    extras_subset = {k:v for k,v in format_mapping_extras.items() if k in format_set}
+    extras_subset = {k: v for k, v in format_mapping_extras.items() if k in format_set}
     return {fmt: fmt for fmt in sorted(format_set)} | extras_subset
+
 
 from_format_mapping = get_format_mapping(input_only_formats, output_only_formats)
 to_format_mapping = get_format_mapping(output_only_formats, input_only_formats)
 
-preamble ="""# generated programmatically. Do not edit.
+preamble = """# generated programmatically. Do not edit.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Sequence, Tuple
+
+from .options import Extension, MathMethod, WrapMode
 
 if TYPE_CHECKING:
     from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
@@ -74,7 +83,7 @@ else:
 
 """
 
-convert_func ="""
+convert_func = """
 def convert(to_convert: str | Path):
     if isinstance(to_convert, Path):
         to_convert = to_convert.read_text()
@@ -82,45 +91,131 @@ def convert(to_convert: str | Path):
 """
 
 from_class = [
-"""
+    """
 @dataclass
 class From:
     _text: str
     from_fmt: str
 
-    def _convert_text(self, to: str) -> str:
-        return _rust_wrapper.convert_text(self.from_fmt, to, self._text)
+    def _prepare_kwargs(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+        cleaned = {k: v for k, v in kwargs.items() if v is not None}
+        if "variables" in cleaned and isinstance(cleaned["variables"], dict):
+            cleaned["variables"] = list(cleaned["variables"].items())
+        if "metadata" in cleaned and isinstance(cleaned["metadata"], dict):
+            cleaned["metadata"] = list(cleaned["metadata"].items())
+        if "extensions" in cleaned:
+            exts = cleaned["extensions"]
+            if isinstance(exts, str):
+                cleaned["extensions"] = [exts]
+            elif isinstance(exts, (set, tuple)):
+                cleaned["extensions"] = list(exts)
+        return cleaned
 
-    def _convert_bytes(self, to: str) -> bytes:
-        return _rust_wrapper.convert(self.from_fmt, to, self._text)  # type: ignore[return-value]
+    def _convert_text(self, to: str, **kwargs: Any) -> str:
+        return _rust_wrapper.convert_text(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))
+
+    def _convert_bytes(self, to: str, **kwargs: Any) -> bytes:
+        return _rust_wrapper.convert(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))  # type: ignore[return-value]
 """
 ]
 
 text_class = [
-"""
+    """
 @dataclass
 class Text:
     _text: str
 """
 ]
 
-def main():
+GLOBAL_OPTIONS = [
+    ("wrap", "WrapMode | None", "None"),
+    ("columns", "int | None", "None"),
+    ("number_sections", "bool", "False"),
+    ("toc", "bool", "False"),
+    ("toc_depth", "int | None", "None"),
+    ("math_method", "MathMethod | None", "None"),
+    ("math_url", "str | None", "None"),
+    ("standalone", "bool", "False"),
+    ("template", "str | None", "None"),
+    ("template_dir", "str | None", "None"),
+    ("variables", "Dict[str, str] | Sequence[Tuple[str, str]] | None", "None"),
+    ("metadata", "Dict[str, str] | Sequence[Tuple[str, str]] | None", "None"),
+    ("highlight_style", "str | None", "None"),
+    ("no_highlight", "bool", "False"),
+    ("idiomatic_highlight", "bool", "False"),
+    ("greedy_paragraphs", "bool", "False"),
+    ("extensions", "Sequence[Extension] | Extension | str | None", "None"),
+]
 
+EPUB_OPTIONS = [
+    ("epub_cover_image", "bytes | None", "None"),
+    ("epub_metadata_xml", "str | None", "None"),
+    ("epub_subdirectory", "str | None", "None"),
+    ("epub_split_level", "int | None", "None"),
+    ("epub_stylesheets", "Sequence[str] | None", "None"),
+]
+
+DOCX_OPTIONS = [
+    ("docx_reference_doc", "bytes | None", "None"),
+]
+
+
+def render_params(params: Iterable[tuple[str, str, str]]) -> list[str]:
+    return [f"{tab2}{name}: {type_annotation} = {default}," for name, type_annotation, default in params]
+
+
+def render_call_args(params: Iterable[tuple[str, str, str]]) -> list[str]:
+    return [f"{tab3}{name}={name}," for name, *_ in params]
+
+
+def render_property(friendly_name: str, internal_name: str) -> list[str]:
+    ret_type = "bytes" if internal_name in binary_output_formats else "str"
+    conv_method = "_convert_bytes" if internal_name in binary_output_formats else "_convert_text"
+    return [
+        f"{tab}@property",
+        f"{tab}def to_{friendly_name}(self) -> {ret_type}:",
+        f'{tab2}return self.{conv_method}("{internal_name}")',
+        "",
+    ]
+
+
+def render_from_property(friendly_name: str, internal_name: str) -> list[str]:
+    return [
+        f"{tab}@property",
+        f"{tab}def from_{friendly_name}(self):",
+        f'{tab2}return From(self._text, "{internal_name}")',
+        "",
+    ]
+
+
+def render_method(friendly_name: str, internal_name: str) -> list[str]:
+    ret_type = "bytes" if internal_name in binary_output_formats else "str"
+    conv_method = "_convert_bytes" if internal_name in binary_output_formats else "_convert_text"
+    method_name = f"to_{friendly_name}_with_options"
+    params = list(GLOBAL_OPTIONS)
+    if internal_name in epub_formats:
+        params += EPUB_OPTIONS
+    if internal_name in docx_formats:
+        params += DOCX_OPTIONS
+
+    lines = [f"{tab}def {method_name}(self,", f"{tab2}*,"]
+    lines.extend(render_params(params))
+    lines.append(f"{tab}) -> {ret_type}:")
+    lines.append(f"{tab2}return self.{conv_method}(")
+    lines.append(f'{tab3}"{internal_name}",')
+    lines.extend(render_call_args(params))
+    lines.append(f"{tab2})")
+    lines.append("")
+    return lines
+
+
+def main():
     for friendly_name, internal_name in to_format_mapping.items():
-        from_class.append(f"{tab}@property")
-        from_class.append(f"{tab}def to_{friendly_name}(self):")
-        
-        if internal_name in binary_output_formats:
-            from_class.append(f'{tab2}return self._convert_bytes("{internal_name}")')
-        else:
-            from_class.append(f'{tab2}return self._convert_text("{internal_name}")')
-        from_class.append("")
+        from_class.extend(render_property(friendly_name, internal_name))
+        from_class.extend(render_method(friendly_name, internal_name))
 
     for friendly_name, internal_name in from_format_mapping.items():
-        text_class.append(f"{tab}@property")
-        text_class.append(f"{tab}def from_{friendly_name}(self):")
-        text_class.append(f'{tab2}return From(self._text, "{internal_name}")')
-        text_class.append("")
+        text_class.extend(render_from_property(friendly_name, internal_name))
 
     with open(init_file, "w") as f:
         f.write(preamble)

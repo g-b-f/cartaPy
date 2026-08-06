@@ -9,6 +9,10 @@ from carta import convert
 
 html = "<p><em>Hello</em> world!</p>"
 markdown = convert(html).from_html.to_markdown
+markdown_with_options = convert(html).from_html.to_markdown_with_options(
+    toc=True,
+    wrap="None",
+)
 
 with open("example.docx", "wb") as f:
     docx = convert(html).from_html.to_docx

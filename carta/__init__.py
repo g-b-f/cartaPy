@@ -2,7 +2,9 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Sequence, Tuple
+
+from .options import Extension, MathMethod, WrapMode
 
 if TYPE_CHECKING:
     from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
@@ -15,139 +17,1497 @@ class From:
     _text: str
     from_fmt: str
 
-    def _convert_text(self, to: str) -> str:
-        return _rust_wrapper.convert_text(self.from_fmt, to, self._text)
+    def _prepare_kwargs(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+        cleaned = {k: v for k, v in kwargs.items() if v is not None}
+        if "variables" in cleaned and isinstance(cleaned["variables"], dict):
+            cleaned["variables"] = list(cleaned["variables"].items())
+        if "metadata" in cleaned and isinstance(cleaned["metadata"], dict):
+            cleaned["metadata"] = list(cleaned["metadata"].items())
+        if "extensions" in cleaned:
+            exts = cleaned["extensions"]
+            if isinstance(exts, str):
+                cleaned["extensions"] = [exts]
+            elif isinstance(exts, (set, tuple)):
+                cleaned["extensions"] = list(exts)
+        return cleaned
 
-    def _convert_bytes(self, to: str) -> bytes:
-        return _rust_wrapper.convert(self.from_fmt, to, self._text)  # type: ignore[return-value]
+    def _convert_text(self, to: str, **kwargs: Any) -> str:
+        return _rust_wrapper.convert_text(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))
+
+    def _convert_bytes(self, to: str, **kwargs: Any) -> bytes:
+        return _rust_wrapper.convert(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))  # type: ignore[return-value]
 
     @property
-    def to_asciidoc(self):
+    def to_asciidoc(self) -> str:
         return self._convert_text("asciidoc")
 
+    def to_asciidoc_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "asciidoc",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_beamer(self):
+    def to_beamer(self) -> str:
         return self._convert_text("beamer")
 
+    def to_beamer_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "beamer",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_commonmark(self):
+    def to_commonmark(self) -> str:
         return self._convert_text("commonmark")
 
+    def to_commonmark_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "commonmark",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_commonmark_x(self):
+    def to_commonmark_x(self) -> str:
         return self._convert_text("commonmark_x")
 
+    def to_commonmark_x_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "commonmark_x",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_docx(self):
+    def to_docx(self) -> bytes:
         return self._convert_bytes("docx")
 
+    def to_docx_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+        docx_reference_doc: bytes | None = None,
+    ) -> bytes:
+        return self._convert_bytes(
+            "docx",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+            docx_reference_doc=docx_reference_doc,
+        )
+
     @property
-    def to_dokuwiki(self):
+    def to_dokuwiki(self) -> str:
         return self._convert_text("dokuwiki")
 
+    def to_dokuwiki_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "dokuwiki",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_epub(self):
+    def to_epub(self) -> bytes:
         return self._convert_bytes("epub")
 
+    def to_epub_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+        epub_cover_image: bytes | None = None,
+        epub_metadata_xml: str | None = None,
+        epub_subdirectory: str | None = None,
+        epub_split_level: int | None = None,
+        epub_stylesheets: Sequence[str] | None = None,
+    ) -> bytes:
+        return self._convert_bytes(
+            "epub",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+            epub_cover_image=epub_cover_image,
+            epub_metadata_xml=epub_metadata_xml,
+            epub_subdirectory=epub_subdirectory,
+            epub_split_level=epub_split_level,
+            epub_stylesheets=epub_stylesheets,
+        )
+
     @property
-    def to_epub2(self):
+    def to_epub2(self) -> bytes:
         return self._convert_bytes("epub2")
 
+    def to_epub2_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+        epub_cover_image: bytes | None = None,
+        epub_metadata_xml: str | None = None,
+        epub_subdirectory: str | None = None,
+        epub_split_level: int | None = None,
+        epub_stylesheets: Sequence[str] | None = None,
+    ) -> bytes:
+        return self._convert_bytes(
+            "epub2",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+            epub_cover_image=epub_cover_image,
+            epub_metadata_xml=epub_metadata_xml,
+            epub_subdirectory=epub_subdirectory,
+            epub_split_level=epub_split_level,
+            epub_stylesheets=epub_stylesheets,
+        )
+
     @property
-    def to_epub3(self):
+    def to_epub3(self) -> bytes:
         return self._convert_bytes("epub3")
 
+    def to_epub3_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+        epub_cover_image: bytes | None = None,
+        epub_metadata_xml: str | None = None,
+        epub_subdirectory: str | None = None,
+        epub_split_level: int | None = None,
+        epub_stylesheets: Sequence[str] | None = None,
+    ) -> bytes:
+        return self._convert_bytes(
+            "epub3",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+            epub_cover_image=epub_cover_image,
+            epub_metadata_xml=epub_metadata_xml,
+            epub_subdirectory=epub_subdirectory,
+            epub_split_level=epub_split_level,
+            epub_stylesheets=epub_stylesheets,
+        )
+
     @property
-    def to_gfm(self):
+    def to_gfm(self) -> str:
         return self._convert_text("gfm")
 
+    def to_gfm_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "gfm",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_html(self):
+    def to_html(self) -> str:
         return self._convert_text("html")
 
+    def to_html_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "html",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_html4(self):
+    def to_html4(self) -> str:
         return self._convert_text("html4")
 
+    def to_html4_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "html4",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_ipynb(self):
+    def to_ipynb(self) -> str:
         return self._convert_text("ipynb")
 
+    def to_ipynb_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "ipynb",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_jira(self):
+    def to_jira(self) -> str:
         return self._convert_text("jira")
 
+    def to_jira_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "jira",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_json(self):
+    def to_json(self) -> str:
         return self._convert_text("json")
 
+    def to_json_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "json",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_latex(self):
+    def to_latex(self) -> str:
         return self._convert_text("latex")
 
+    def to_latex_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "latex",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_man(self):
+    def to_man(self) -> str:
         return self._convert_text("man")
 
+    def to_man_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "man",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_markdown(self):
+    def to_markdown(self) -> str:
         return self._convert_text("markdown")
 
+    def to_markdown_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "markdown",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_markdown_github(self):
+    def to_markdown_github(self) -> str:
         return self._convert_text("markdown_github")
 
+    def to_markdown_github_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "markdown_github",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_markdown_mmd(self):
+    def to_markdown_mmd(self) -> str:
         return self._convert_text("markdown_mmd")
 
+    def to_markdown_mmd_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "markdown_mmd",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_markdown_phpextra(self):
+    def to_markdown_phpextra(self) -> str:
         return self._convert_text("markdown_phpextra")
 
+    def to_markdown_phpextra_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "markdown_phpextra",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_markdown_strict(self):
+    def to_markdown_strict(self) -> str:
         return self._convert_text("markdown_strict")
 
+    def to_markdown_strict_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "markdown_strict",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_mediawiki(self):
+    def to_mediawiki(self) -> str:
         return self._convert_text("mediawiki")
 
+    def to_mediawiki_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "mediawiki",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_native(self):
+    def to_native(self) -> str:
         return self._convert_text("native")
 
+    def to_native_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "native",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_odt(self):
+    def to_odt(self) -> bytes:
         return self._convert_bytes("odt")
 
+    def to_odt_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> bytes:
+        return self._convert_bytes(
+            "odt",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_opml(self):
+    def to_opml(self) -> str:
         return self._convert_text("opml")
 
+    def to_opml_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "opml",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_org(self):
+    def to_org(self) -> str:
         return self._convert_text("org")
 
+    def to_org_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "org",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_plain(self):
+    def to_plain(self) -> str:
         return self._convert_text("plain")
 
+    def to_plain_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "plain",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_revealjs(self):
+    def to_revealjs(self) -> str:
         return self._convert_text("revealjs")
 
+    def to_revealjs_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "revealjs",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     @property
-    def to_rst(self):
+    def to_rst(self) -> str:
         return self._convert_text("rst")
 
-    @property
-    def to_rtf(self):
-        return self._convert_text("rtf")
+    def to_rst_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "rst",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
 
     @property
-    def to_typst(self):
+    def to_rtf(self) -> str:
+        return self._convert_text("rtf")
+
+    def to_rtf_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "rtf",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
+    @property
+    def to_typst(self) -> str:
         return self._convert_text("typst")
+
+    def to_typst_with_options(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "typst",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
 
 @dataclass
 class Text:
