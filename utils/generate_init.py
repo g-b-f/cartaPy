@@ -93,9 +93,6 @@ class From:
 
     def _convert_bytes(self, to: str) -> bytes:
         return _rust_wrapper.convert(self.from_fmt, to, self._text)  # type: ignore[return-value]
-
-    def _convert(self, to: str) -> str | bytes:
-        return _rust_wrapper.convert(self.from_fmt, to, self._text)
 """
 ]
 
