@@ -43,23 +43,22 @@ formats = {
     "revealjs",
 }
 
-input_only_formats = {"html5", "csv", "tsv"}
-output_only_formats: set[str] = set()
-
-output_formats = (formats - input_only_formats) | output_only_formats
-
-format_mapping_partial = {
+format_mapping_extras = {
     "github_markdown": "gfm",
     "jupyter": "ipynb",
     "jupyter_notebook": "ipynb",
     "restructured_text": "rst",
 }
+input_only_formats = {"html5", "csv", "tsv"}
+output_only_formats: set[str] = set()
 
-from_format_mapping = {fmt: fmt for fmt in sorted(formats)} | format_mapping_partial
-to_format_mapping = {fmt: fmt for fmt in sorted(output_formats)} | format_mapping_partial
-format_mapping = from_format_mapping
+def get_format_mapping(includes: set[str], excludes: set[str]):
+    format_set = (formats - excludes) | includes
+    extras_subset = {k:v for k,v in format_mapping_extras.items() if k in format_set}
+    return {fmt: fmt for fmt in sorted(format_set)} | extras_subset
 
-
+from_format_mapping = get_format_mapping(input_only_formats, output_only_formats)
+to_format_mapping = get_format_mapping(output_only_formats, input_only_formats)
 
 preamble ="""# generated programmatically. Do not edit.
 
