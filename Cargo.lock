@@ -473,7 +473,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pycarta"
+name = "cartapy"
 version = "0.1.0"
 dependencies = [
  "carta",

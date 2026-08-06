@@ -1,16 +1,26 @@
-[build-system]
-requires = ["maturin>=1.11,<2.0"]
-build-backend = "maturin"
-
 [project]
-name = "pyCarta"
-requires-python = ">=3.8"
+name = "cartapy"
+requires-python = ">=3.9"
+description = "Easy to use document converter"
+readme = "README.md"
+packages = ["carta"]
+license = "MIT"
+license-files = ["LICENSE"]
+
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
+keywords = ["document", "converter", "conversion", "pandoc", "carta"]
 dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/g-b-f/cartapy"
+
+[build-system]
+requires = ["maturin>=1.11,<2.0"]
+build-backend = "maturin"
 
 [dependency-groups]
 dev = [
@@ -18,6 +28,13 @@ dev = [
     "pytest-cov>=5.0.0",
     "pytest-mock>=3.14.1",
 ]
+
+[tool.mypy]
+check_untyped_defs = true
+follow_untyped_imports = true
+
+[tool.maturin]
+include = ["carta/*"] 
 
 [tool.ruff.lint]
 extend-select = [
@@ -35,3 +52,4 @@ extend-select = [
 ]
 [tool.pytest.ini_options]
 pythonpath = ["."]
+filterwarnings = ["error"]

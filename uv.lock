@@ -417,7 +417,7 @@ wheels = [
 ]
 
 [[package]]
-name = "pycarta"
+name = "cartapy"
 source = { editable = "." }
 
 [package.dev-dependencies]

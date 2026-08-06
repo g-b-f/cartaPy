@@ -1,7 +1,7 @@
-# pyCarta - Developer & AI Agent Guide
+# cartaPy - Developer & AI Agent Guide
 
 ## Overview
-`pyCarta` is a Python extension package that wraps the Rust [`carta`](https://crates.io/crates/carta) document conversion crate via PyO3.
+`cartaPy` is a Python extension package that wraps the Rust [`carta`](https://crates.io/crates/carta) document conversion crate via PyO3.
 
 ## Essential Commands
 
