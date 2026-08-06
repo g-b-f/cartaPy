@@ -21,10 +21,11 @@ fn convert_text(
 
 #[pyfunction]
 fn convert(
+    py: Python<'_>,
     from_format: &str,
     to_format: &str,
-    input_text: &str
-) -> PyResult<PyObject> {
+    input_text: &str,
+) -> PyResult<Py<PyAny>> {
     let reader_options = carta::ReaderOptions::default();
     let writer_options = carta::WriterOptions::default();
 
@@ -37,10 +38,10 @@ fn convert(
     )
     .map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
 
-    Python::with_gil(|py| match output {
-        carta::Output::Text(text) => Ok(PyString::new(py, &text).into()),
-        carta::Output::Bytes(bytes) => Ok(PyBytes::new(py, &bytes).into()),
-    })
+    match output {
+        carta::Output::Text(text) => Ok(PyString::new(py, &text).into_any().unbind()),
+        carta::Output::Bytes(bytes) => Ok(PyBytes::new(py, &bytes).into_any().unbind()),
+    }
 }
 
 #[pymodule]
