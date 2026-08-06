@@ -4,11 +4,54 @@ tab = " "*4
 tab2 = tab*2
 
 init_file = Path(__file__).parent.parent / "carta" / "__init__.py"
-formats = {
-    "markdown": "markdown",
-    # "md": "markdown",
-    "html": "html"
+
+formats = [
+    "commonmark",
+    "commonmark_x",
+    "markdown",
+    "gfm",
+    "markdown_strict",
+    "markdown_mmd",
+    "markdown_phpextra",
+    "markdown_github",
+    "json",
+    "native",
+    "html",
+    "html5",
+    "html4",
+    "plain",
+    "csv",
+    "tsv",
+    "opml",
+    "rst",
+    "ipynb",
+    "mediawiki",
+    "dokuwiki",
+    "jira",
+    "man",
+    "latex",
+    "org",
+    "rtf",
+    "docx",
+    "epub",
+    "epub3",
+    "epub2",
+    "odt",
+    "typst",
+    "asciidoc",
+    "beamer",
+    "revealjs",
+]
+format_mapping_partial = {
+    "github_markdown": "gfm",
+    "jupyter": "ipynb",
+    "jupyter_notebook": "ipynb",
+    "restructured_text": "rst",
 }
+
+format_mapping = {fmt:fmt for fmt in formats} | format_mapping_partial
+
+
 
 preamble ="""# generated programmatically. Do not edit.
 
@@ -52,7 +95,7 @@ class Text:
 
 def main():
 
-    for friendly_name, internal_name in formats.items():
+    for friendly_name, internal_name in format_mapping.items():
         from_class.append(f"{tab}@property")
         from_class.append(f"{tab}def to_{friendly_name}(self):")
         from_class.append(f'{tab2}return self._convert("{internal_name}")')
@@ -71,7 +114,7 @@ def main():
         f.write("\n".join(text_class))
         f.write(convert_func)
 
-    print(f"Generated {init_file} with formats: {', '.join(formats.keys())}")
+    print(f"Generated {init_file}")
 
 
 if __name__ == "__main__":
