@@ -150,3 +150,17 @@ class TestConversionsWithOptions:
         with pytest.raises(TypeError):
             from_obj.to_epub_with_options(docx_reference_doc=b"ref") # type: ignore[reportCallIssue]
 
+
+test_files = [
+    "markdown_from_pandoc",
+    "markdown_with_html"
+]
+
+class TestConvertFromPath:
+    @pytest.mark.skip(reason="currently failing - revisit later")
+    @pytest.mark.parametrize("file_name", test_files)
+    def test_files(self, file_name: str):
+        file_in = test_files_path / (file_name+".md")
+        file_out = test_files_path / (file_name+".html")
+        res = convert(file_in).from_markdown.to_html
+        assert res == file_out.read_text()

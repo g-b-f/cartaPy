@@ -1,0 +1,222 @@
+<h1 id="introduction">Introduction</h1>
+<p>Pandoc has long supported filters, which allow the pandoc abstract
+syntax tree (AST) to be manipulated between the parsing and the writing
+phase. <a href="https://pandoc.org/filters.html">Traditional pandoc
+filters</a> accept a JSON representation of the pandoc AST and produce
+an altered JSON representation of the AST. They may be written in any
+programming language, and invoked from pandoc using the
+<code>--filter</code> option.</p>
+<p>Although traditional filters are very flexible, they have a couple of
+disadvantages. First, there is some overhead in writing JSON to stdout
+and reading it from stdin (twice, once on each side of the filter).
+Second, whether a filter will work will depend on details of the user’s
+environment. A filter may require an interpreter for a certain
+programming language to be available, as well as a library for
+manipulating the pandoc AST in JSON form. One cannot simply provide a
+filter that can be used by anyone who has a certain version of the
+pandoc executable.</p>
+<p>Starting with version 2.0, pandoc makes it possible to write filters
+in Lua without any external dependencies at all. A Lua interpreter
+(version 5.3) and a Lua library for creating pandoc filters is built
+into the pandoc executable. Pandoc data types are marshaled to Lua
+directly, avoiding the overhead of writing JSON to stdout and reading it
+from stdin.</p>
+<p>Here is an example of a Lua filter that converts strong emphasis to
+small caps:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode lua"><code class="sourceCode lua"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cn">S</span>trong <span class="op">=</span> <span class="kw">function</span> <span class="op">(</span>elem<span class="op">)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> pandoc<span class="op">.</span>SmallCaps<span class="op">(</span>elem<span class="op">.</span>c<span class="op">)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span><span class="op">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>or equivalently,</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode lua"><code class="sourceCode lua"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> Strong<span class="op">(</span>elem<span class="op">)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> pandoc<span class="op">.</span>SmallCaps<span class="op">(</span>elem<span class="op">.</span>c<span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<p>This says: walk the AST, and when you find a Strong element, replace
+it with a SmallCaps element with the same content.</p>
+<p>To run it, save it in a file, say <code>smallcaps.lua</code>, and
+invoke pandoc with <code>--lua-filter=smallcaps.lua</code>.</p>
+<p>Here’s a quick performance comparison, converting the pandoc manual
+(MANUAL.txt) to HTML, with versions of the same JSON filter written in
+compiled Haskell (<code>smallcaps</code>) and interpreted Python
+(<code>smallcaps.py</code>):</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Command</th>
+<th style="text-align: left;">Time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>pandoc</code></td>
+<td style="text-align: left;">1.01s</td>
+</tr>
+<tr class="even">
+<td
+style="text-align: left;"><code>pandoc --filter ./smallcaps</code></td>
+<td style="text-align: left;">1.36s</td>
+</tr>
+<tr class="odd">
+<td
+style="text-align: left;"><code>pandoc --filter ./smallcaps.py</code></td>
+<td style="text-align: left;">1.40s</td>
+</tr>
+<tr class="even">
+<td
+style="text-align: left;"><code>pandoc --lua-filter ./smallcaps.lua</code></td>
+<td style="text-align: left;">1.03s</td>
+</tr>
+</tbody>
+</table>
+<p>As you can see, the Lua filter avoids the substantial overhead
+associated with marshaling to and from JSON over a pipe.</p>
+<h1 id="lua-filter-structure">Lua filter structure</h1>
+<p>Lua filters are tables with element names as keys and values
+consisting of functions acting on those elements.</p>
+<p>Filters are expected to be put into separate files and are passed via
+the <code>--lua-filter</code> command-line argument. For example, if a
+filter is defined in a file <code>current-date.lua</code>, then it would
+be applied like this:</p>
+<pre><code>pandoc --lua-filter=current-date.lua -f markdown MANUAL.txt</code></pre>
+<p>The <code>--lua-filter</code> option may be supplied multiple times.
+Pandoc applies all filters (including JSON filters specified via
+<code>--filter</code> and Lua filters specified via
+<code>--lua-filter</code>) in the order they appear on the command
+line.</p>
+<p>Pandoc expects each Lua file to return a list of filters. The filters
+in that list are called sequentially, each on the result of the previous
+filter. If there is no value returned by the filter script, then pandoc
+will try to generate a single filter by collecting all top-level
+functions whose names correspond to those of pandoc elements (e.g.,
+<code>Str</code>, <code>Para</code>, <code>Meta</code>, or
+<code>Pandoc</code>). (That is why the two examples above are
+equivalent.)</p>
+<p>For each filter, the document is traversed and each element subjected
+to the filter. Elements for which the filter contains an entry (i.e. a
+function of the same name) are passed to Lua element filtering function.
+In other words, filter entries will be called for each corresponding
+element in the document, getting the respective element as input.</p>
+<p>The return value of a filter function must be one of the
+following:</p>
+<ul class="incremental">
+<li>nil: this means that the object should remain unchanged.</li>
+<li>a pandoc object: this must be of the same type as the input and will
+replace the original object.</li>
+<li>a list of pandoc objects: these will replace the original object;
+the list is merged with the neighbors of the original objects (spliced
+into the list the original object belongs to); returning an empty list
+deletes the object.</li>
+</ul>
+<p>The function’s output must result in an element of the same type as
+the input. This means a filter function acting on an inline element must
+return either nil, an inline, or a list of inlines, and a function
+filtering a block element must return one of nil, a block, or a list of
+block elements. Pandoc will throw an error if this condition is
+violated.</p>
+<p>If there is no function matching the element’s node type, then the
+filtering system will look for a more general fallback function. Two
+fallback functions are supported, <code>Inline</code> and
+<code>Block</code>. Each matches elements of the respective type.</p>
+<p>Elements without matching functions are left untouched.</p>
+<p>See <a href="#module-pandoc">module documentation</a> for a list of
+pandoc elements.</p>
+<h2 id="filters-on-element-sequences">Filters on element sequences</h2>
+<p>For some filtering tasks, it is necessary to know the order in which
+elements occur in the document. It is not enough then to inspect a
+single element at a time.</p>
+<p>There are two special function names, which can be used to define
+filters on lists of blocks or lists of inlines.</p>
+<dl class="incremental">
+<dt><span id="inlines-filter"><code>Inlines (inlines)</code></span></dt>
+<dd>
+If present in a filter, this function will be called on all lists of
+inline elements, like the content of a [Para] (paragraph) block, or the
+description of an [Image]. The <code>inlines</code> argument passed to
+the function will be a [List] of [Inline] elements for each call.
+</dd>
+<dt><span id="blocks-filter"><code>Blocks (blocks)</code></span></dt>
+<dd>
+If present in a filter, this function will be called on all lists of
+block elements, like the content of a [MetaBlocks] meta element block,
+on each item of a list, and the main content of the [Pandoc] document.
+The <code>blocks</code> argument passed to the function will be a [List]
+of [Block] elements for each call.
+</dd>
+</dl>
+<p>These filter functions are special in that the result must either be
+nil, in which case the list is left unchanged, or must be a list of the
+correct type, i.e., the same type as the input argument. Single elements
+are <strong>not</strong> allowed as return values, as a single element
+in this context usually hints at a bug.</p>
+<p>See <a href="#remove-spaces-before-citations">“Remove spaces before
+normal citations”</a> for an example.</p>
+<p>This functionality has been added in pandoc 2.9.2.</p>
+<h2 id="traversal-order">Traversal order</h2>
+<p>The traversal order of filters can be selected by setting the key
+<code>traverse</code> to either <code>'topdown'</code> or
+<code>'typewise'</code>; the default is <code>'typewise'</code>.</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode lua"><code class="sourceCode lua"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">local</span> filter <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  traverse <span class="op">=</span> <span class="st">&#39;topdown&#39;</span><span class="op">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- ... filter functions ...</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>filter<span class="op">}</span></span></code></pre></div>
+<p>Support for this was added in pandoc 2.17; previous versions ignore
+the <code>traverse</code> setting.</p>
+<h3 id="typewise-traversal">Typewise traversal</h3>
+<p>Element filter functions within a filter set are called in a fixed
+order, skipping any which are not present:</p>
+<ol class="incremental" type="1">
+<li>functions for <a href="#type-inline"><em>Inline</em>
+elements</a>,</li>
+<li>the <a href="#inlines-filter"><code>Inlines</code></a> filter
+function,</li>
+<li>functions for <a href="#type-block"><em>Block</em> elements</a>
+,</li>
+<li>the <a href="#inlines-filter"><code>Blocks</code></a> filter
+function,</li>
+<li>the <a href="#type-meta"><code>Meta</code></a> filter function, and
+last</li>
+<li>the <a href="#type-pandoc"><code>Pandoc</code></a> filter
+function.</li>
+</ol>
+<p>It is still possible to force a different order by explicitly
+returning multiple filter sets. For example, if the filter for
+<em>Meta</em> is to be run before that for <em>Str</em>, one can
+write</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode lua"><code class="sourceCode lua"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- ... filter definitions ...</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span> <span class="cn">M</span>eta <span class="op">=</span> <span class="cn">M</span>eta <span class="op">},</span>  <span class="co">-- (1)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span> <span class="cn">S</span>tr <span class="op">=</span> <span class="cn">S</span>tr <span class="op">}</span>     <span class="co">-- (2)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Filter sets are applied in the order in which they are returned. All
+functions in set (1) are thus run before those in (2), causing the
+filter function for <em>Meta</em> to be run before the filtering of
+<em>Str</em> elements is started.</p>
+<h3 id="topdown-traversal">Topdown traversal</h3>
+<p>It is sometimes more natural to traverse the document tree
+depth-first from the root towards the leaves, and all in a single
+run.</p>
+<p>For example, a block list <code
+class="sourceCode haskell">[<span class="dt">Plain</span> [<span class="dt">Str</span> <span class="st">&quot;a&quot;</span>], <span class="dt">Para</span> [<span class="dt">Str</span> <span class="st">&quot;b&quot;</span>]]</code>
+will try the following filter functions, in order: <code>Blocks</code>,
+<code>Plain</code>, <code>Inlines</code>, <code>Str</code>,
+<code>Para</code>, <code>Inlines</code>, <code>Str</code>.</p>
+<p>Topdown traversals can be cut short by returning <code>false</code>
+as a second value from the filter function. No child-element of the
+returned element is processed in that case.</p>
+<p>For example, to exclude the contents of a footnote from being
+processed, one might write</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode lua"><code class="sourceCode lua"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>traverse <span class="op">=</span> <span class="st">&#39;topdown&#39;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> Note <span class="op">(</span>n<span class="op">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> n<span class="op">,</span> <span class="kw">false</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
