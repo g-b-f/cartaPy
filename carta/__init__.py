@@ -2,10 +2,11 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Sequence, Tuple
+from typing import Any, Dict, Sequence, Tuple
 
-from .options import Extension, MathMethod, WrapMode
 from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
+from .options import Extension, MathMethod, WrapMode
+
 
 @dataclass
 class From:

@@ -3,9 +3,9 @@ from pathlib import Path
 import pytest
 from pytest_mock import MockerFixture
 
-from carta import convert, From
+from carta import From, convert
 from utils.generate_init import (
-    binary_output_formats,
+    binary_formats,
     from_format_mapping,
     to_format_mapping,
 )
@@ -53,7 +53,7 @@ class TestSimpleConversions:
         assert ret == html
 
 
-    @pytest.mark.parametrize("binary_format", sorted(binary_output_formats))
+    @pytest.mark.parametrize("binary_format", sorted(binary_formats))
     def test_convert_to_bytes(self, binary_format: str):
         ret = get_conversion(get_from_obj("sample", "markdown"), binary_format)
         assert isinstance(ret, bytes)

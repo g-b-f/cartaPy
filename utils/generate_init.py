@@ -54,12 +54,12 @@ format_mapping_extras = {
     "open_document_text": "odt"
 }
 
-binary_output_formats = {"docx", "epub", "epub2", "epub3", "odt"}
 epub_formats = {"epub", "epub2", "epub3"}
 docx_formats = {"docx"}
+binary_formats = epub_formats | docx_formats | {"odt"}
+
 input_only_formats = {"html5", "csv", "tsv"}
 output_only_formats: set[str] = set()
-
 
 def get_format_mapping(includes: set[str], excludes: set[str]):
     format_set = (formats - excludes) | includes
@@ -74,10 +74,11 @@ preamble = """# generated programmatically. Do not edit.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Sequence, Tuple
+from typing import Any, Dict, Sequence, Tuple
 
-from .options import Extension, MathMethod, WrapMode
 from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
+from .options import Extension, MathMethod, WrapMode
+
 """
 
 convert_func = """
@@ -160,21 +161,8 @@ DOCX_OPTIONS = [
 def render_params(params: Iterable[tuple[str, str, str]]) -> list[str]:
     return [f"{tab2}{name}: {type_annotation} = {default}," for name, type_annotation, default in params]
 
-
 def render_call_args(params: Iterable[tuple[str, str, str]]) -> list[str]:
     return [f"{tab3}{name}={name}," for name, *_ in params]
-
-
-# def render_to_property(friendly_name: str, internal_name: str) -> list[str]:
-#     ret_type = "bytes" if internal_name in binary_output_formats else "str"
-#     conv_method = "_convert_bytes" if internal_name in binary_output_formats else "_convert_text"
-#     return [
-#         f"{tab}@property",
-#         f"{tab}def to_{friendly_name}(self) -> {ret_type}:",
-#         f'{tab2}return self.{conv_method}("{internal_name}")',
-#         "",
-#     ]
-
 
 def render_from_property(friendly_name: str, internal_name: str) -> list[str]:
     return [
@@ -186,8 +174,8 @@ def render_from_property(friendly_name: str, internal_name: str) -> list[str]:
 
 
 def render_to_method(friendly_name: str, internal_name: str) -> list[str]:
-    ret_type = "bytes" if internal_name in binary_output_formats else "str"
-    conv_method = "_convert_bytes" if internal_name in binary_output_formats else "_convert_text"
+    ret_type = "bytes" if internal_name in binary_formats else "str"
+    conv_method = "_convert_bytes" if internal_name in binary_formats else "_convert_text"
     method_name = f"to_{friendly_name}"
     params = list(GLOBAL_OPTIONS)
     if internal_name in epub_formats:
@@ -208,7 +196,6 @@ def render_to_method(friendly_name: str, internal_name: str) -> list[str]:
 
 def main():
     for friendly_name, internal_name in to_format_mapping.items():
-        # from_class.extend(render_to_property(friendly_name, internal_name))
         from_class.extend(render_to_method(friendly_name, internal_name))
 
     for friendly_name, internal_name in from_format_mapping.items():
