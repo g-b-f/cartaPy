@@ -44,7 +44,7 @@ jobs:
           if cargo_version != tag_version:
               raise Exception(f'Cargo.toml version ({cargo_version}) does not match tag version ({tag_version})')
 
-          print(f'Cargo.toml version ({cargo_version}) matches tag ({ref_name})')
+          print(f'Cargo.toml version ({cargo_version}) matches tag ({tag_version})')
           "
 
       - name: Install uv
