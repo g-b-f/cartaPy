@@ -4,9 +4,6 @@ from utils.generate_init import init_file, main
 def test_generate_init_has_been_run():
     """Verify that carta/__init__.py is up-to-date with code generation."""
     existing_init = init_file.read_text()
-
-    assert "def convert(to_convert: str | Path):" in existing_init
-
     main()
     regenerated_init = init_file.read_text()
 

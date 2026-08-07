@@ -82,7 +82,7 @@ from .options import Extension, MathMethod, WrapMode
 """
 
 convert_func = """
-def convert(to_convert: str | Path):
+def convert(to_convert: str | bytes | Path):
     if isinstance(to_convert, Path):
         to_convert = to_convert.read_text()
     return Text(to_convert)
@@ -92,7 +92,7 @@ from_class = [
 """
 @dataclass
 class From:
-    _text: str
+    _text: str | bytes
     from_fmt: str
 
     def _prepare_kwargs(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
@@ -109,19 +109,19 @@ class From:
                 not_none["extensions"] = list(exts)
         return not_none
 
-    def _convert_text(self, to: str, **kwargs: Any) -> str:
-        return _rust_wrapper.convert_text(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))
+    def _convert_to_text(self, to: str, **kwargs: Any) -> str:
+        return _rust_wrapper.convert(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))
 
-    def _convert_bytes(self, to: str, **kwargs: Any) -> bytes:
-        return _rust_wrapper.convert(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))  # type: ignore[return-value]
+    def _convert_to_bytes(self, to: str, **kwargs: Any) -> bytes:
+        return _rust_wrapper.convert(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))
 """
 ]
 
 text_class = [
-    """
+"""
 @dataclass
 class Text:
-    _text: str
+    _text: str | bytes
 """
 ]
 

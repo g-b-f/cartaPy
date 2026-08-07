@@ -19,7 +19,7 @@ markdown_formats = [
     fmt for fmt, internal in to_format_mapping.items() if internal in ("markdown", "gfm")
 ]
 
-def get_from_obj(input_text: str, from_format: str) -> From:
+def get_from_obj(input_text: str|bytes, from_format: str) -> From:
     return getattr(convert(input_text), f"from_{from_format}")
 
 def get_conversion(from_obj: From, to_format: str) -> str |bytes:
@@ -53,11 +53,16 @@ class TestSimpleConversions:
         assert ret == html
 
 
-    @pytest.mark.parametrize("binary_format", sorted(binary_formats))
+    @pytest.mark.parametrize("binary_format", sorted(binary_formats & set(to_format_mapping.values())))
     def test_convert_to_bytes(self, binary_format: str):
         ret = get_conversion(get_from_obj("sample", "markdown"), binary_format)
         assert isinstance(ret, bytes)
         assert len(ret) > 0
+
+    @pytest.mark.parametrize("binary_format", sorted(binary_formats & set(from_format_mapping.values())))
+    def test_convert_from_bytes(self, binary_format: str):
+        binary = get_conversion(get_from_obj("sample", "markdown"), binary_format)
+        get_conversion(get_from_obj(binary, binary_format), "markdown")
 
 
 class TestConversionsWithOptions:
@@ -122,7 +127,7 @@ class TestConversionsWithOptions:
         )
 
     def test_to_html_with_options(self, mocker: MockerFixture):
-        mock_convert = mocker.patch("carta._rust_wrapper.convert_text", return_value="<p>mock html</p>")
+        mock_convert = mocker.patch("carta._rust_wrapper.convert", return_value="<p>mock html</p>")
         res = convert("Hello html").from_markdown.to_html(
             toc=True, number_sections=True
         )
@@ -161,7 +166,7 @@ class TestConvertFromPath:
         file_in.write_text(markdown)
         res = convert(file_in).from_markdown.to_html()
         assert res == html
-    
+        
     @pytest.mark.skip(reason="currently failing - revisit later")
     @pytest.mark.parametrize("file_name", test_files)
     def test_premade_files(self, file_name: str):

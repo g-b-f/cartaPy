@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import importlib
 import importlib.machinery
 import importlib.util
@@ -26,6 +24,4 @@ def _load_extension():
         ) from error
 
 _ext = _load_extension()
-
-convert_text = _ext.convert_text
 convert = _ext.convert

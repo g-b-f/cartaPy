@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use pyo3::exceptions::PyRuntimeError;
+use pyo3::exceptions::{PyRuntimeError, PyTypeError};
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyString};
 use carta;
@@ -181,104 +181,11 @@ fn build_options(
     epub_stylesheets = None,
     docx_reference_doc = None,
 ))]
-fn convert_text(
-    from_format: &str,
-    to_format: &str,
-    input_text: &str,
-    wrap: Option<&str>,
-    columns: Option<usize>,
-    number_sections: bool,
-    toc: bool,
-    toc_depth: Option<usize>,
-    math_method: Option<&str>,
-    math_url: Option<String>,
-    standalone: bool,
-    template: Option<String>,
-    template_dir: Option<String>,
-    variables: Option<Vec<(String, String)>>,
-    metadata: Option<Vec<(String, String)>>,
-    highlight_style: Option<String>,
-    no_highlight: bool,
-    idiomatic_highlight: bool,
-    greedy_paragraphs: bool,
-    extensions: Option<Vec<String>>,
-    epub_cover_image: Option<Vec<u8>>,
-    epub_metadata_xml: Option<String>,
-    epub_subdirectory: Option<String>,
-    epub_split_level: Option<usize>,
-    epub_stylesheets: Option<Vec<String>>,
-    docx_reference_doc: Option<Vec<u8>>,
-) -> PyResult<String> {
-    let (reader_options, writer_options) = build_options(
-        wrap,
-        columns,
-        number_sections,
-        toc,
-        toc_depth,
-        math_method,
-        math_url,
-        standalone,
-        template,
-        template_dir,
-        variables,
-        metadata,
-        highlight_style,
-        no_highlight,
-        idiomatic_highlight,
-        greedy_paragraphs,
-        extensions,
-        epub_cover_image,
-        epub_metadata_xml,
-        epub_subdirectory,
-        epub_split_level,
-        epub_stylesheets,
-        docx_reference_doc,
-    )?;
-
-    carta::convert_text(
-        from_format,
-        to_format,
-        input_text,
-        &reader_options,
-        &writer_options,
-    )
-    .map_err(|err| PyRuntimeError::new_err(err.to_string()))
-}
-
-#[pyfunction]
-#[pyo3(signature = (
-    from_format,
-    to_format,
-    input_text,
-    wrap = None,
-    columns = None,
-    number_sections = false,
-    toc = false,
-    toc_depth = None,
-    math_method = None,
-    math_url = None,
-    standalone = false,
-    template = None,
-    template_dir = None,
-    variables = None,
-    metadata = None,
-    highlight_style = None,
-    no_highlight = false,
-    idiomatic_highlight = false,
-    greedy_paragraphs = false,
-    extensions = None,
-    epub_cover_image = None,
-    epub_metadata_xml = None,
-    epub_subdirectory = None,
-    epub_split_level = None,
-    epub_stylesheets = None,
-    docx_reference_doc = None,
-))]
 fn convert(
     py: Python<'_>,
     from_format: &str,
     to_format: &str,
-    input_text: &str,
+    input_text: &Bound<'_, PyAny>,
     wrap: Option<&str>,
     columns: Option<usize>,
     number_sections: bool,
@@ -329,14 +236,21 @@ fn convert(
         docx_reference_doc,
     )?;
 
+    let input_bytes = if let Ok(text) = input_text.extract::<String>() {
+        text.into_bytes()
+    } else if let Ok(bytes) = input_text.extract::<Vec<u8>>() {
+        bytes
+    } else {
+        return Err(PyTypeError::new_err("input must be str or bytes"));
+    };
+
     let output = carta::convert(
         from_format,
         to_format,
-        input_text.as_bytes(),
+        &input_bytes,
         &reader_options,
         &writer_options,
-    )
-    .map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
+    ).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
 
     match output {
         carta::Output::Text(text) => Ok(PyString::new(py, &text).into_any().unbind()),
@@ -346,7 +260,6 @@ fn convert(
 
 #[pymodule]
 fn _rust_wrapper(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(convert_text, m)?)?;
     m.add_function(wrap_pyfunction!(convert, m)?)?;
     Ok(())
 }
