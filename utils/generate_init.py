@@ -75,12 +75,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Sequence, Tuple
 
 from .options import Extension, MathMethod, WrapMode
-
-if TYPE_CHECKING:
-    from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
-else:
-    from . import _rust_wrapper
-
+from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
 """
 
 convert_func = """
@@ -98,18 +93,18 @@ class From:
     from_fmt: str
 
     def _prepare_kwargs(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
-        cleaned = {k: v for k, v in kwargs.items() if v is not None}
-        if "variables" in cleaned and isinstance(cleaned["variables"], dict):
-            cleaned["variables"] = list(cleaned["variables"].items())
-        if "metadata" in cleaned and isinstance(cleaned["metadata"], dict):
-            cleaned["metadata"] = list(cleaned["metadata"].items())
-        if "extensions" in cleaned:
-            exts = cleaned["extensions"]
+        not_none = {k: v for k, v in kwargs.items() if v is not None}
+        if "variables" in not_none and isinstance(not_none["variables"], dict):
+            not_none["variables"] = list(not_none["variables"].items())
+        if "metadata" in not_none and isinstance(not_none["metadata"], dict):
+            not_none["metadata"] = list(not_none["metadata"].items())
+        if "extensions" in not_none:
+            exts = not_none["extensions"]
             if isinstance(exts, str):
-                cleaned["extensions"] = [exts]
+                not_none["extensions"] = [exts]
             elif isinstance(exts, (set, tuple)):
-                cleaned["extensions"] = list(exts)
-        return cleaned
+                not_none["extensions"] = list(exts)
+        return not_none
 
     def _convert_text(self, to: str, **kwargs: Any) -> str:
         return _rust_wrapper.convert_text(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))
@@ -168,15 +163,15 @@ def render_call_args(params: Iterable[tuple[str, str, str]]) -> list[str]:
     return [f"{tab3}{name}={name}," for name, *_ in params]
 
 
-def render_property(friendly_name: str, internal_name: str) -> list[str]:
-    ret_type = "bytes" if internal_name in binary_output_formats else "str"
-    conv_method = "_convert_bytes" if internal_name in binary_output_formats else "_convert_text"
-    return [
-        f"{tab}@property",
-        f"{tab}def to_{friendly_name}(self) -> {ret_type}:",
-        f'{tab2}return self.{conv_method}("{internal_name}")',
-        "",
-    ]
+# def render_to_property(friendly_name: str, internal_name: str) -> list[str]:
+#     ret_type = "bytes" if internal_name in binary_output_formats else "str"
+#     conv_method = "_convert_bytes" if internal_name in binary_output_formats else "_convert_text"
+#     return [
+#         f"{tab}@property",
+#         f"{tab}def to_{friendly_name}(self) -> {ret_type}:",
+#         f'{tab2}return self.{conv_method}("{internal_name}")',
+#         "",
+#     ]
 
 
 def render_from_property(friendly_name: str, internal_name: str) -> list[str]:
@@ -188,10 +183,10 @@ def render_from_property(friendly_name: str, internal_name: str) -> list[str]:
     ]
 
 
-def render_method(friendly_name: str, internal_name: str) -> list[str]:
+def render_to_method(friendly_name: str, internal_name: str) -> list[str]:
     ret_type = "bytes" if internal_name in binary_output_formats else "str"
     conv_method = "_convert_bytes" if internal_name in binary_output_formats else "_convert_text"
-    method_name = f"to_{friendly_name}_with_options"
+    method_name = f"to_{friendly_name}"
     params = list(GLOBAL_OPTIONS)
     if internal_name in epub_formats:
         params += EPUB_OPTIONS
@@ -211,8 +206,8 @@ def render_method(friendly_name: str, internal_name: str) -> list[str]:
 
 def main():
     for friendly_name, internal_name in to_format_mapping.items():
-        from_class.extend(render_property(friendly_name, internal_name))
-        from_class.extend(render_method(friendly_name, internal_name))
+        # from_class.extend(render_to_property(friendly_name, internal_name))
+        from_class.extend(render_to_method(friendly_name, internal_name))
 
     for friendly_name, internal_name in from_format_mapping.items():
         text_class.extend(render_from_property(friendly_name, internal_name))

@@ -93,6 +93,7 @@ jobs:
           name: wheels-linux-${{ matrix.platform.target }}
           path: dist
 
+
   test_install:
       name: Test Install
       runs-on: ubuntu-latest
@@ -120,8 +121,8 @@ jobs:
             html = "<p><em>Hello</em> world!</p>"
             markdown = "*Hello* world!"
 
-            expected_md = convert(html).from_html.to_markdown
-            expected_html = convert(markdown).from_markdown.to_html
+            expected_md = convert(html).from_html.to_markdown()
+            expected_html = convert(markdown).from_markdown.to_html()
 
             assert expected_md == markdown, f"Expected: {markdown}, but got: {expected_md}"
             assert expected_html == html, f"Expected: {html}, but got: {expected_html}"
@@ -269,6 +270,7 @@ jobs:
           name: wheels-sdist
           path: dist
 
+  
   release:
       name: Release
       runs-on: ubuntu-latest

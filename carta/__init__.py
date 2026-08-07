@@ -5,12 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Sequence, Tuple
 
 from .options import Extension, MathMethod, WrapMode
-
-if TYPE_CHECKING:
-    from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
-else:
-    from . import _rust_wrapper
-
+from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
 
 @dataclass
 class From:
@@ -18,18 +13,18 @@ class From:
     from_fmt: str
 
     def _prepare_kwargs(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
-        cleaned = {k: v for k, v in kwargs.items() if v is not None}
-        if "variables" in cleaned and isinstance(cleaned["variables"], dict):
-            cleaned["variables"] = list(cleaned["variables"].items())
-        if "metadata" in cleaned and isinstance(cleaned["metadata"], dict):
-            cleaned["metadata"] = list(cleaned["metadata"].items())
-        if "extensions" in cleaned:
-            exts = cleaned["extensions"]
+        not_none = {k: v for k, v in kwargs.items() if v is not None}
+        if "variables" in not_none and isinstance(not_none["variables"], dict):
+            not_none["variables"] = list(not_none["variables"].items())
+        if "metadata" in not_none and isinstance(not_none["metadata"], dict):
+            not_none["metadata"] = list(not_none["metadata"].items())
+        if "extensions" in not_none:
+            exts = not_none["extensions"]
             if isinstance(exts, str):
-                cleaned["extensions"] = [exts]
+                not_none["extensions"] = [exts]
             elif isinstance(exts, (set, tuple)):
-                cleaned["extensions"] = list(exts)
-        return cleaned
+                not_none["extensions"] = list(exts)
+        return not_none
 
     def _convert_text(self, to: str, **kwargs: Any) -> str:
         return _rust_wrapper.convert_text(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))
@@ -37,11 +32,7 @@ class From:
     def _convert_bytes(self, to: str, **kwargs: Any) -> bytes:
         return _rust_wrapper.convert(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))  # type: ignore[return-value]
 
-    @property
-    def to_asciidoc(self) -> str:
-        return self._convert_text("asciidoc")
-
-    def to_asciidoc_with_options(self,
+    def to_asciidoc(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -82,11 +73,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_beamer(self) -> str:
-        return self._convert_text("beamer")
-
-    def to_beamer_with_options(self,
+    def to_beamer(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -127,11 +114,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_commonmark(self) -> str:
-        return self._convert_text("commonmark")
-
-    def to_commonmark_with_options(self,
+    def to_commonmark(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -172,11 +155,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_commonmark_x(self) -> str:
-        return self._convert_text("commonmark_x")
-
-    def to_commonmark_x_with_options(self,
+    def to_commonmark_x(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -217,11 +196,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_docx(self) -> bytes:
-        return self._convert_bytes("docx")
-
-    def to_docx_with_options(self,
+    def to_docx(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -264,11 +239,7 @@ class From:
             docx_reference_doc=docx_reference_doc,
         )
 
-    @property
-    def to_dokuwiki(self) -> str:
-        return self._convert_text("dokuwiki")
-
-    def to_dokuwiki_with_options(self,
+    def to_dokuwiki(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -309,11 +280,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_epub(self) -> bytes:
-        return self._convert_bytes("epub")
-
-    def to_epub_with_options(self,
+    def to_epub(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -364,11 +331,7 @@ class From:
             epub_stylesheets=epub_stylesheets,
         )
 
-    @property
-    def to_epub2(self) -> bytes:
-        return self._convert_bytes("epub2")
-
-    def to_epub2_with_options(self,
+    def to_epub2(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -419,11 +382,7 @@ class From:
             epub_stylesheets=epub_stylesheets,
         )
 
-    @property
-    def to_epub3(self) -> bytes:
-        return self._convert_bytes("epub3")
-
-    def to_epub3_with_options(self,
+    def to_epub3(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -474,11 +433,7 @@ class From:
             epub_stylesheets=epub_stylesheets,
         )
 
-    @property
-    def to_gfm(self) -> str:
-        return self._convert_text("gfm")
-
-    def to_gfm_with_options(self,
+    def to_gfm(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -519,11 +474,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_html(self) -> str:
-        return self._convert_text("html")
-
-    def to_html_with_options(self,
+    def to_html(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -564,11 +515,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_html4(self) -> str:
-        return self._convert_text("html4")
-
-    def to_html4_with_options(self,
+    def to_html4(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -609,11 +556,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_ipynb(self) -> str:
-        return self._convert_text("ipynb")
-
-    def to_ipynb_with_options(self,
+    def to_ipynb(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -654,11 +597,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_jira(self) -> str:
-        return self._convert_text("jira")
-
-    def to_jira_with_options(self,
+    def to_jira(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -699,11 +638,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_json(self) -> str:
-        return self._convert_text("json")
-
-    def to_json_with_options(self,
+    def to_json(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -744,11 +679,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_latex(self) -> str:
-        return self._convert_text("latex")
-
-    def to_latex_with_options(self,
+    def to_latex(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -789,11 +720,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_man(self) -> str:
-        return self._convert_text("man")
-
-    def to_man_with_options(self,
+    def to_man(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -834,11 +761,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_markdown(self) -> str:
-        return self._convert_text("markdown")
-
-    def to_markdown_with_options(self,
+    def to_markdown(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -879,11 +802,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_markdown_github(self) -> str:
-        return self._convert_text("markdown_github")
-
-    def to_markdown_github_with_options(self,
+    def to_markdown_github(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -924,11 +843,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_markdown_mmd(self) -> str:
-        return self._convert_text("markdown_mmd")
-
-    def to_markdown_mmd_with_options(self,
+    def to_markdown_mmd(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -969,11 +884,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_markdown_phpextra(self) -> str:
-        return self._convert_text("markdown_phpextra")
-
-    def to_markdown_phpextra_with_options(self,
+    def to_markdown_phpextra(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1014,11 +925,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_markdown_strict(self) -> str:
-        return self._convert_text("markdown_strict")
-
-    def to_markdown_strict_with_options(self,
+    def to_markdown_strict(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1059,11 +966,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_mediawiki(self) -> str:
-        return self._convert_text("mediawiki")
-
-    def to_mediawiki_with_options(self,
+    def to_mediawiki(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1104,11 +1007,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_native(self) -> str:
-        return self._convert_text("native")
-
-    def to_native_with_options(self,
+    def to_native(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1149,11 +1048,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_odt(self) -> bytes:
-        return self._convert_bytes("odt")
-
-    def to_odt_with_options(self,
+    def to_odt(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1194,11 +1089,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_opml(self) -> str:
-        return self._convert_text("opml")
-
-    def to_opml_with_options(self,
+    def to_opml(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1239,11 +1130,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_org(self) -> str:
-        return self._convert_text("org")
-
-    def to_org_with_options(self,
+    def to_org(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1284,11 +1171,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_plain(self) -> str:
-        return self._convert_text("plain")
-
-    def to_plain_with_options(self,
+    def to_plain(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1329,11 +1212,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_revealjs(self) -> str:
-        return self._convert_text("revealjs")
-
-    def to_revealjs_with_options(self,
+    def to_revealjs(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1374,11 +1253,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_rst(self) -> str:
-        return self._convert_text("rst")
-
-    def to_rst_with_options(self,
+    def to_rst(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1419,11 +1294,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_rtf(self) -> str:
-        return self._convert_text("rtf")
-
-    def to_rtf_with_options(self,
+    def to_rtf(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
@@ -1464,11 +1335,7 @@ class From:
             extensions=extensions,
         )
 
-    @property
-    def to_typst(self) -> str:
-        return self._convert_text("typst")
-
-    def to_typst_with_options(self,
+    def to_typst(self,
         *,
         wrap: WrapMode | None = None,
         columns: int | None = None,
