@@ -1376,6 +1376,47 @@ class From:
             extensions=extensions,
         )
 
+    def to_markdown_github(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "gfm",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     def to_jupyter(self,
         *,
         wrap: WrapMode | None = None,
@@ -1480,6 +1521,88 @@ class From:
     ) -> str:
         return self._convert_text(
             "rst",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
+    def to_multimarkdown(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_text(
+            "markdown_mmd",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
+    def to_open_document_text(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> bytes:
+        return self._convert_bytes(
+            "odt",
             wrap=wrap,
             columns=columns,
             number_sections=number_sections,
@@ -1644,6 +1767,10 @@ class Text:
         return From(self._text, "gfm")
 
     @property
+    def from_markdown_github(self):
+        return From(self._text, "gfm")
+
+    @property
     def from_jupyter(self):
         return From(self._text, "ipynb")
 
@@ -1654,6 +1781,14 @@ class Text:
     @property
     def from_restructured_text(self):
         return From(self._text, "rst")
+
+    @property
+    def from_multimarkdown(self):
+        return From(self._text, "markdown_mmd")
+
+    @property
+    def from_open_document_text(self):
+        return From(self._text, "odt")
 
 def convert(to_convert: str | Path):
     if isinstance(to_convert, Path):

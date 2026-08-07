@@ -46,9 +46,12 @@ formats = {
 
 format_mapping_extras = {
     "github_markdown": "gfm",
+    "markdown_github": "gfm",
     "jupyter": "ipynb",
     "jupyter_notebook": "ipynb",
     "restructured_text": "rst",
+    "multimarkdown": "markdown_mmd",
+    "open_document_text": "odt"
 }
 
 binary_output_formats = {"docx", "epub", "epub2", "epub3", "odt"}
@@ -85,7 +88,7 @@ def convert(to_convert: str | Path):
 """
 
 from_class = [
-    """
+"""
 @dataclass
 class From:
     _text: str
