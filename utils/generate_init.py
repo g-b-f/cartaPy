@@ -60,7 +60,7 @@ output_only_formats: set[str] = set()
 
 def get_format_mapping(includes: set[str], excludes: set[str]):
     format_set = (formats - excludes) | includes
-    extras_subset = {k: v for k, v in format_mapping_extras.items() if k in format_set}
+    extras_subset = {k: v for k, v in format_mapping_extras.items() if v in format_set}
     return {fmt: fmt for fmt in sorted(format_set)} | extras_subset
 
 
