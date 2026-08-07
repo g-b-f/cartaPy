@@ -38,7 +38,7 @@ class TestSimpleConversions:
     @pytest.mark.parametrize("to_name", to_format_mapping.keys())
     def test_format_mapping_attributes_exists(self, from_name: str, to_name:str):
         from_obj = get_from_obj("sample",from_name)
-        
+
         # doing hasattr(from_obj) would trigger the conversion, which we don't want
         assert hasattr(type(from_obj), f"to_{to_name}")
         assert hasattr(type(from_obj), f"to_{to_name}_with_options")
@@ -158,9 +158,15 @@ test_files = [
 ]
 
 class TestConvertFromPath:
+    def test_basic_conversion(self, tmp_path:Path):
+        file_in = tmp_path / "input.md"
+        file_in.write_text(markdown)
+        res = convert(file_in).from_markdown.to_html
+        assert res == html
+    
     @pytest.mark.skip(reason="currently failing - revisit later")
     @pytest.mark.parametrize("file_name", test_files)
-    def test_files(self, file_name: str):
+    def test_premade_files(self, file_name: str):
         file_in = test_files_path / (file_name+".md")
         file_out = test_files_path / (file_name+".html")
         res = convert(file_in).from_markdown.to_html
