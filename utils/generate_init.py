@@ -15,7 +15,6 @@ formats = {
     "markdown_strict",
     "markdown_mmd",
     "markdown_phpextra",
-    "markdown_github",
     "json",
     "native",
     "html",
