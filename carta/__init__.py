@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Sequence, Tuple
+from typing import Any, Sequence
 
 from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
 from .options import Extension, MathMethod, WrapMode
@@ -10,10 +10,10 @@ from .options import Extension, MathMethod, WrapMode
 
 @dataclass
 class From:
-    _text: str
+    _data: str | bytes
     from_fmt: str
 
-    def _prepare_kwargs(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    def _prepare_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         not_none = {k: v for k, v in kwargs.items() if v is not None}
         if "variables" in not_none and isinstance(not_none["variables"], dict):
             not_none["variables"] = list(not_none["variables"].items())
@@ -27,11 +27,11 @@ class From:
                 not_none["extensions"] = list(exts)
         return not_none
 
-    def _convert_text(self, to: str, **kwargs: Any) -> str:
-        return _rust_wrapper.convert_text(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))
+    def _convert_to_text(self, to: str, **kwargs: Any) -> str:
+        return _rust_wrapper.convert(self.from_fmt, to, self._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
 
-    def _convert_bytes(self, to: str, **kwargs: Any) -> bytes:
-        return _rust_wrapper.convert(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))  # type: ignore[return-value]
+    def _convert_to_bytes(self, to: str, **kwargs: Any) -> bytes:
+        return _rust_wrapper.convert(self.from_fmt, to, self._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
 
     def to_asciidoc(self,
         *,
@@ -45,15 +45,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "asciidoc",
             wrap=wrap,
             columns=columns,
@@ -86,15 +86,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "beamer",
             wrap=wrap,
             columns=columns,
@@ -127,15 +127,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "commonmark",
             wrap=wrap,
             columns=columns,
@@ -168,15 +168,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "commonmark_x",
             wrap=wrap,
             columns=columns,
@@ -209,8 +209,8 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
@@ -218,7 +218,7 @@ class From:
         extensions: Sequence[Extension] | Extension | str | None = None,
         docx_reference_doc: bytes | None = None,
     ) -> bytes:
-        return self._convert_bytes(
+        return self._convert_to_bytes(
             "docx",
             wrap=wrap,
             columns=columns,
@@ -252,15 +252,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "dokuwiki",
             wrap=wrap,
             columns=columns,
@@ -293,8 +293,8 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
@@ -306,7 +306,7 @@ class From:
         epub_split_level: int | None = None,
         epub_stylesheets: Sequence[str] | None = None,
     ) -> bytes:
-        return self._convert_bytes(
+        return self._convert_to_bytes(
             "epub",
             wrap=wrap,
             columns=columns,
@@ -344,8 +344,8 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
@@ -357,7 +357,7 @@ class From:
         epub_split_level: int | None = None,
         epub_stylesheets: Sequence[str] | None = None,
     ) -> bytes:
-        return self._convert_bytes(
+        return self._convert_to_bytes(
             "epub2",
             wrap=wrap,
             columns=columns,
@@ -395,8 +395,8 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
@@ -408,7 +408,7 @@ class From:
         epub_split_level: int | None = None,
         epub_stylesheets: Sequence[str] | None = None,
     ) -> bytes:
-        return self._convert_bytes(
+        return self._convert_to_bytes(
             "epub3",
             wrap=wrap,
             columns=columns,
@@ -446,15 +446,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "gfm",
             wrap=wrap,
             columns=columns,
@@ -487,15 +487,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "html",
             wrap=wrap,
             columns=columns,
@@ -528,15 +528,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "html4",
             wrap=wrap,
             columns=columns,
@@ -569,15 +569,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "ipynb",
             wrap=wrap,
             columns=columns,
@@ -610,15 +610,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "jira",
             wrap=wrap,
             columns=columns,
@@ -651,15 +651,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "json",
             wrap=wrap,
             columns=columns,
@@ -692,15 +692,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "latex",
             wrap=wrap,
             columns=columns,
@@ -733,15 +733,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "man",
             wrap=wrap,
             columns=columns,
@@ -774,15 +774,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "markdown",
             wrap=wrap,
             columns=columns,
@@ -815,15 +815,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "markdown_mmd",
             wrap=wrap,
             columns=columns,
@@ -856,15 +856,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "markdown_phpextra",
             wrap=wrap,
             columns=columns,
@@ -897,15 +897,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "markdown_strict",
             wrap=wrap,
             columns=columns,
@@ -938,15 +938,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "mediawiki",
             wrap=wrap,
             columns=columns,
@@ -979,15 +979,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "native",
             wrap=wrap,
             columns=columns,
@@ -1020,15 +1020,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> bytes:
-        return self._convert_bytes(
+        return self._convert_to_bytes(
             "odt",
             wrap=wrap,
             columns=columns,
@@ -1061,15 +1061,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "opml",
             wrap=wrap,
             columns=columns,
@@ -1102,15 +1102,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "org",
             wrap=wrap,
             columns=columns,
@@ -1143,15 +1143,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "plain",
             wrap=wrap,
             columns=columns,
@@ -1184,15 +1184,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "revealjs",
             wrap=wrap,
             columns=columns,
@@ -1225,15 +1225,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "rst",
             wrap=wrap,
             columns=columns,
@@ -1266,15 +1266,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "rtf",
             wrap=wrap,
             columns=columns,
@@ -1307,15 +1307,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "typst",
             wrap=wrap,
             columns=columns,
@@ -1348,15 +1348,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "gfm",
             wrap=wrap,
             columns=columns,
@@ -1389,15 +1389,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "gfm",
             wrap=wrap,
             columns=columns,
@@ -1430,15 +1430,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "ipynb",
             wrap=wrap,
             columns=columns,
@@ -1471,15 +1471,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "ipynb",
             wrap=wrap,
             columns=columns,
@@ -1512,15 +1512,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "rst",
             wrap=wrap,
             columns=columns,
@@ -1553,15 +1553,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
-        return self._convert_text(
+        return self._convert_to_text(
             "markdown_mmd",
             wrap=wrap,
             columns=columns,
@@ -1594,15 +1594,15 @@ class From:
         standalone: bool = False,
         template: str | None = None,
         template_dir: str | None = None,
-        variables: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
-        metadata: Dict[str, str] | Sequence[Tuple[str, str]] | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         highlight_style: str | None = None,
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
         extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> bytes:
-        return self._convert_bytes(
+        return self._convert_to_bytes(
             "odt",
             wrap=wrap,
             columns=columns,
@@ -1625,173 +1625,165 @@ class From:
 
 @dataclass
 class Text:
-    _text: str
+    _data: str | bytes
 
     @property
     def from_asciidoc(self):
-        return From(self._text, "asciidoc")
+        return From(self._data, "asciidoc")
 
     @property
     def from_beamer(self):
-        return From(self._text, "beamer")
+        return From(self._data, "beamer")
 
     @property
     def from_commonmark(self):
-        return From(self._text, "commonmark")
+        return From(self._data, "commonmark")
 
     @property
     def from_commonmark_x(self):
-        return From(self._text, "commonmark_x")
+        return From(self._data, "commonmark_x")
 
     @property
     def from_csv(self):
-        return From(self._text, "csv")
+        return From(self._data, "csv")
 
     @property
     def from_docx(self):
-        return From(self._text, "docx")
+        return From(self._data, "docx")
 
     @property
     def from_dokuwiki(self):
-        return From(self._text, "dokuwiki")
+        return From(self._data, "dokuwiki")
 
     @property
     def from_epub(self):
-        return From(self._text, "epub")
-
-    @property
-    def from_epub2(self):
-        return From(self._text, "epub2")
-
-    @property
-    def from_epub3(self):
-        return From(self._text, "epub3")
+        return From(self._data, "epub")
 
     @property
     def from_gfm(self):
-        return From(self._text, "gfm")
+        return From(self._data, "gfm")
 
     @property
     def from_html(self):
-        return From(self._text, "html")
+        return From(self._data, "html")
 
     @property
     def from_html4(self):
-        return From(self._text, "html4")
+        return From(self._data, "html4")
 
     @property
     def from_html5(self):
-        return From(self._text, "html5")
+        return From(self._data, "html5")
 
     @property
     def from_ipynb(self):
-        return From(self._text, "ipynb")
+        return From(self._data, "ipynb")
 
     @property
     def from_jira(self):
-        return From(self._text, "jira")
+        return From(self._data, "jira")
 
     @property
     def from_json(self):
-        return From(self._text, "json")
+        return From(self._data, "json")
 
     @property
     def from_latex(self):
-        return From(self._text, "latex")
+        return From(self._data, "latex")
 
     @property
     def from_man(self):
-        return From(self._text, "man")
+        return From(self._data, "man")
 
     @property
     def from_markdown(self):
-        return From(self._text, "markdown")
+        return From(self._data, "markdown")
 
     @property
     def from_markdown_mmd(self):
-        return From(self._text, "markdown_mmd")
+        return From(self._data, "markdown_mmd")
 
     @property
     def from_markdown_phpextra(self):
-        return From(self._text, "markdown_phpextra")
+        return From(self._data, "markdown_phpextra")
 
     @property
     def from_markdown_strict(self):
-        return From(self._text, "markdown_strict")
+        return From(self._data, "markdown_strict")
 
     @property
     def from_mediawiki(self):
-        return From(self._text, "mediawiki")
+        return From(self._data, "mediawiki")
 
     @property
     def from_native(self):
-        return From(self._text, "native")
+        return From(self._data, "native")
 
     @property
     def from_odt(self):
-        return From(self._text, "odt")
+        return From(self._data, "odt")
 
     @property
     def from_opml(self):
-        return From(self._text, "opml")
+        return From(self._data, "opml")
 
     @property
     def from_org(self):
-        return From(self._text, "org")
+        return From(self._data, "org")
 
     @property
     def from_plain(self):
-        return From(self._text, "plain")
+        return From(self._data, "plain")
 
     @property
     def from_revealjs(self):
-        return From(self._text, "revealjs")
+        return From(self._data, "revealjs")
 
     @property
     def from_rst(self):
-        return From(self._text, "rst")
+        return From(self._data, "rst")
 
     @property
     def from_rtf(self):
-        return From(self._text, "rtf")
+        return From(self._data, "rtf")
 
     @property
     def from_tsv(self):
-        return From(self._text, "tsv")
+        return From(self._data, "tsv")
 
     @property
     def from_typst(self):
-        return From(self._text, "typst")
+        return From(self._data, "typst")
 
     @property
     def from_github_markdown(self):
-        return From(self._text, "gfm")
+        return From(self._data, "gfm")
 
     @property
     def from_markdown_github(self):
-        return From(self._text, "gfm")
+        return From(self._data, "gfm")
 
     @property
     def from_jupyter(self):
-        return From(self._text, "ipynb")
+        return From(self._data, "ipynb")
 
     @property
     def from_jupyter_notebook(self):
-        return From(self._text, "ipynb")
+        return From(self._data, "ipynb")
 
     @property
     def from_restructured_text(self):
-        return From(self._text, "rst")
+        return From(self._data, "rst")
 
     @property
     def from_multimarkdown(self):
-        return From(self._text, "markdown_mmd")
+        return From(self._data, "markdown_mmd")
 
     @property
     def from_open_document_text(self):
-        return From(self._text, "odt")
+        return From(self._data, "odt")
 
-def convert(to_convert: str | Path):
+def convert(to_convert: str | bytes | Path):
     if isinstance(to_convert, Path):
         to_convert = to_convert.read_text()
     return Text(to_convert)

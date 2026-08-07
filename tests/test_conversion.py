@@ -32,7 +32,7 @@ class TestSimpleConversions:
     def test_from_format_mapping(self, friendly_name:str, internal_name: str):
         from_obj = get_from_obj("sample", friendly_name)
         assert from_obj.from_fmt == internal_name
-        assert from_obj._text == "sample"
+        assert from_obj._data == "sample"
 
     @pytest.mark.parametrize("from_name", from_format_mapping.keys())
     @pytest.mark.parametrize("to_name", to_format_mapping.keys())

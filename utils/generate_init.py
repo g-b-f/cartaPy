@@ -56,15 +56,17 @@ format_mapping_extras = {
 
 epub_formats = {"epub", "epub2", "epub3"}
 docx_formats = {"docx"}
-binary_formats = epub_formats | docx_formats | {"odt"}
+odt_formats = {"odt"}
+binary_formats = epub_formats | docx_formats | odt_formats
 
 input_only_formats = {"html5", "csv", "tsv"}
-output_only_formats: set[str] = set()
+output_only_formats = {"epub2", "epub3"}
+
 
 def get_format_mapping(includes: set[str], excludes: set[str]):
     format_set = (formats - excludes) | includes
-    extras_subset = {k: v for k, v in format_mapping_extras.items() if v in format_set}
-    return {fmt: fmt for fmt in sorted(format_set)} | extras_subset
+    extras = {k: v for k, v in format_mapping_extras.items() if v in format_set}
+    return {fmt: fmt for fmt in sorted(format_set)} | extras
 
 
 from_format_mapping = get_format_mapping(input_only_formats, output_only_formats)
@@ -74,7 +76,7 @@ preamble = """# generated programmatically. Do not edit.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Sequence, Tuple
+from typing import Any, Sequence
 
 from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
 from .options import Extension, MathMethod, WrapMode
@@ -92,10 +94,10 @@ from_class = [
 """
 @dataclass
 class From:
-    _text: str | bytes
+    _data: str | bytes
     from_fmt: str
 
-    def _prepare_kwargs(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    def _prepare_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         not_none = {k: v for k, v in kwargs.items() if v is not None}
         if "variables" in not_none and isinstance(not_none["variables"], dict):
             not_none["variables"] = list(not_none["variables"].items())
@@ -110,10 +112,10 @@ class From:
         return not_none
 
     def _convert_to_text(self, to: str, **kwargs: Any) -> str:
-        return _rust_wrapper.convert(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))
+        return _rust_wrapper.convert(self.from_fmt, to, self._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
 
     def _convert_to_bytes(self, to: str, **kwargs: Any) -> bytes:
-        return _rust_wrapper.convert(self.from_fmt, to, self._text, **self._prepare_kwargs(kwargs))
+        return _rust_wrapper.convert(self.from_fmt, to, self._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
 """
 ]
 
@@ -121,7 +123,7 @@ text_class = [
 """
 @dataclass
 class Text:
-    _text: str | bytes
+    _data: str | bytes
 """
 ]
 
@@ -136,8 +138,8 @@ GLOBAL_OPTIONS = [
     ("standalone", "bool", "False"),
     ("template", "str | None", "None"),
     ("template_dir", "str | None", "None"),
-    ("variables", "Dict[str, str] | Sequence[Tuple[str, str]] | None", "None"),
-    ("metadata", "Dict[str, str] | Sequence[Tuple[str, str]] | None", "None"),
+    ("variables", "dict[str, str] | Sequence[tuple[str, str]] | None", "None"),
+    ("metadata", "dict[str, str] | Sequence[tuple[str, str]] | None", "None"),
     ("highlight_style", "str | None", "None"),
     ("no_highlight", "bool", "False"),
     ("idiomatic_highlight", "bool", "False"),
@@ -168,14 +170,14 @@ def render_from_property(friendly_name: str, internal_name: str) -> list[str]:
     return [
         f"{tab}@property",
         f"{tab}def from_{friendly_name}(self):",
-        f'{tab2}return From(self._text, "{internal_name}")',
+        f'{tab2}return From(self._data, "{internal_name}")',
         "",
     ]
 
 
 def render_to_method(friendly_name: str, internal_name: str) -> list[str]:
     ret_type = "bytes" if internal_name in binary_formats else "str"
-    conv_method = "_convert_bytes" if internal_name in binary_formats else "_convert_text"
+    conv_method = "_convert_to_bytes" if internal_name in binary_formats else "_convert_to_text"
     method_name = f"to_{friendly_name}"
     params = list(GLOBAL_OPTIONS)
     if internal_name in epub_formats:
