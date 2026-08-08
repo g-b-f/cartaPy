@@ -24,7 +24,10 @@ markdown_with_options = convert(html).from_html.to_markdown(
     wrap="None",
 )
 
+with open("example.docx", "rb") as f:
+    html = convert(f).from_docx.to_html()
+
 with open("example.docx", "wb") as f:
-    docx = convert(html).from_html.to_docx
+    docx = convert(html).from_html.to_docx()
     f.write(docx)
 ```

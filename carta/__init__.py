@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
+from io import TextIOWrapper, BufferedReader
 
 from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
 from .options import Extension, MathMethod, WrapMode
@@ -10,8 +11,15 @@ from .options import Extension, MathMethod, WrapMode
 
 @dataclass
 class From:
-    _data: str | bytes
-    from_fmt: str
+    _document: "Document"
+    from_format: str
+
+    @property
+    def is_bytes(self) -> bool:
+        return self._document.is_bytes
+
+    def __repr__(self) -> str:
+        return f"<From: convert {self._document!r} from {self.from_format}>"
 
     def _prepare_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         not_none = {k: v for k, v in kwargs.items() if v is not None}
@@ -28,10 +36,10 @@ class From:
         return not_none
 
     def _convert_to_text(self, to: str, **kwargs: Any) -> str:
-        return _rust_wrapper.convert(self.from_fmt, to, self._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
+        return _rust_wrapper.convert(self.from_format, to, self._document._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
 
     def _convert_to_bytes(self, to: str, **kwargs: Any) -> bytes:
-        return _rust_wrapper.convert(self.from_fmt, to, self._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
+        return _rust_wrapper.convert(self.from_format, to, self._document._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
 
     def to_asciidoc(self,
         *,
@@ -1624,166 +1632,178 @@ class From:
         )
 
 @dataclass
-class Text:
+class Document:
     _data: str | bytes
 
     @property
+    def is_bytes(self) -> bool:
+        return isinstance(self._data, bytes)
+
+    def __repr__(self) -> str:
+        if self.is_bytes:
+            return f"<Document: {len(self._data)} bytes>"
+        return f"<Document: {len(self._data)} characters>"
+    
+
+    @property
     def from_asciidoc(self):
-        return From(self._data, "asciidoc")
+        return From(self, "asciidoc")
 
     @property
     def from_beamer(self):
-        return From(self._data, "beamer")
+        return From(self, "beamer")
 
     @property
     def from_commonmark(self):
-        return From(self._data, "commonmark")
+        return From(self, "commonmark")
 
     @property
     def from_commonmark_x(self):
-        return From(self._data, "commonmark_x")
+        return From(self, "commonmark_x")
 
     @property
     def from_csv(self):
-        return From(self._data, "csv")
+        return From(self, "csv")
 
     @property
     def from_docx(self):
-        return From(self._data, "docx")
+        return From(self, "docx")
 
     @property
     def from_dokuwiki(self):
-        return From(self._data, "dokuwiki")
+        return From(self, "dokuwiki")
 
     @property
     def from_epub(self):
-        return From(self._data, "epub")
+        return From(self, "epub")
 
     @property
     def from_gfm(self):
-        return From(self._data, "gfm")
+        return From(self, "gfm")
 
     @property
     def from_html(self):
-        return From(self._data, "html")
+        return From(self, "html")
 
     @property
     def from_html4(self):
-        return From(self._data, "html4")
+        return From(self, "html4")
 
     @property
     def from_html5(self):
-        return From(self._data, "html5")
+        return From(self, "html5")
 
     @property
     def from_ipynb(self):
-        return From(self._data, "ipynb")
+        return From(self, "ipynb")
 
     @property
     def from_jira(self):
-        return From(self._data, "jira")
+        return From(self, "jira")
 
     @property
     def from_json(self):
-        return From(self._data, "json")
+        return From(self, "json")
 
     @property
     def from_latex(self):
-        return From(self._data, "latex")
+        return From(self, "latex")
 
     @property
     def from_man(self):
-        return From(self._data, "man")
+        return From(self, "man")
 
     @property
     def from_markdown(self):
-        return From(self._data, "markdown")
+        return From(self, "markdown")
 
     @property
     def from_markdown_mmd(self):
-        return From(self._data, "markdown_mmd")
+        return From(self, "markdown_mmd")
 
     @property
     def from_markdown_phpextra(self):
-        return From(self._data, "markdown_phpextra")
+        return From(self, "markdown_phpextra")
 
     @property
     def from_markdown_strict(self):
-        return From(self._data, "markdown_strict")
+        return From(self, "markdown_strict")
 
     @property
     def from_mediawiki(self):
-        return From(self._data, "mediawiki")
+        return From(self, "mediawiki")
 
     @property
     def from_native(self):
-        return From(self._data, "native")
+        return From(self, "native")
 
     @property
     def from_odt(self):
-        return From(self._data, "odt")
+        return From(self, "odt")
 
     @property
     def from_opml(self):
-        return From(self._data, "opml")
+        return From(self, "opml")
 
     @property
     def from_org(self):
-        return From(self._data, "org")
+        return From(self, "org")
 
     @property
     def from_plain(self):
-        return From(self._data, "plain")
+        return From(self, "plain")
 
     @property
     def from_revealjs(self):
-        return From(self._data, "revealjs")
+        return From(self, "revealjs")
 
     @property
     def from_rst(self):
-        return From(self._data, "rst")
+        return From(self, "rst")
 
     @property
     def from_rtf(self):
-        return From(self._data, "rtf")
+        return From(self, "rtf")
 
     @property
     def from_tsv(self):
-        return From(self._data, "tsv")
+        return From(self, "tsv")
 
     @property
     def from_typst(self):
-        return From(self._data, "typst")
+        return From(self, "typst")
 
     @property
     def from_github_markdown(self):
-        return From(self._data, "gfm")
+        return From(self, "gfm")
 
     @property
     def from_markdown_github(self):
-        return From(self._data, "gfm")
+        return From(self, "gfm")
 
     @property
     def from_jupyter(self):
-        return From(self._data, "ipynb")
+        return From(self, "ipynb")
 
     @property
     def from_jupyter_notebook(self):
-        return From(self._data, "ipynb")
+        return From(self, "ipynb")
 
     @property
     def from_restructured_text(self):
-        return From(self._data, "rst")
+        return From(self, "rst")
 
     @property
     def from_multimarkdown(self):
-        return From(self._data, "markdown_mmd")
+        return From(self, "markdown_mmd")
 
     @property
     def from_open_document_text(self):
-        return From(self._data, "odt")
+        return From(self, "odt")
 
-def convert(to_convert: str | bytes | Path):
+def convert(to_convert: str | bytes | Path | TextIOWrapper | BufferedReader):
     if isinstance(to_convert, Path):
         to_convert = to_convert.read_text()
-    return Text(to_convert)
+    elif isinstance(to_convert, (TextIOWrapper, BufferedReader)):
+        to_convert = to_convert.read()
+    return Document(to_convert)

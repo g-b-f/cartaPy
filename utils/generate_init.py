@@ -77,6 +77,7 @@ preamble = """# generated programmatically. Do not edit.
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
+from io import TextIOWrapper, BufferedReader
 
 from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
 from .options import Extension, MathMethod, WrapMode
@@ -84,18 +85,27 @@ from .options import Extension, MathMethod, WrapMode
 """
 
 convert_func = """
-def convert(to_convert: str | bytes | Path):
+def convert(to_convert: str | bytes | Path | TextIOWrapper | BufferedReader):
     if isinstance(to_convert, Path):
         to_convert = to_convert.read_text()
-    return Text(to_convert)
+    elif isinstance(to_convert, (TextIOWrapper, BufferedReader)):
+        to_convert = to_convert.read()
+    return Document(to_convert)
 """
 
 from_class = [
 """
 @dataclass
 class From:
-    _data: str | bytes
-    from_fmt: str
+    _document: "Document"
+    from_format: str
+
+    @property
+    def is_bytes(self) -> bool:
+        return self._document.is_bytes
+
+    def __repr__(self) -> str:
+        return f"<From: convert {self._document!r} from {self.from_format}>"
 
     def _prepare_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         not_none = {k: v for k, v in kwargs.items() if v is not None}
@@ -112,18 +122,28 @@ class From:
         return not_none
 
     def _convert_to_text(self, to: str, **kwargs: Any) -> str:
-        return _rust_wrapper.convert(self.from_fmt, to, self._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
+        return _rust_wrapper.convert(self.from_format, to, self._document._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
 
     def _convert_to_bytes(self, to: str, **kwargs: Any) -> bytes:
-        return _rust_wrapper.convert(self.from_fmt, to, self._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
+        return _rust_wrapper.convert(self.from_format, to, self._document._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
 """
 ]
 
-text_class = [
+document_class = [
 """
 @dataclass
-class Text:
+class Document:
     _data: str | bytes
+
+    @property
+    def is_bytes(self) -> bool:
+        return isinstance(self._data, bytes)
+
+    def __repr__(self) -> str:
+        if self.is_bytes:
+            return f"<Document: {len(self._data)} bytes>"
+        return f"<Document: {len(self._data)} characters>"
+    
 """
 ]
 
@@ -170,25 +190,25 @@ def render_from_property(friendly_name: str, internal_name: str) -> list[str]:
     return [
         f"{tab}@property",
         f"{tab}def from_{friendly_name}(self):",
-        f'{tab2}return From(self._data, "{internal_name}")',
+        f'{tab2}return From(self, "{internal_name}")',
         "",
     ]
 
 
 def render_to_method(friendly_name: str, internal_name: str) -> list[str]:
     ret_type = "bytes" if internal_name in binary_formats else "str"
-    conv_method = "_convert_to_bytes" if internal_name in binary_formats else "_convert_to_text"
-    method_name = f"to_{friendly_name}"
+    method = "_convert_to_bytes" if internal_name in binary_formats else "_convert_to_text"
+
     params = list(GLOBAL_OPTIONS)
     if internal_name in epub_formats:
         params += EPUB_OPTIONS
     if internal_name in docx_formats:
         params += DOCX_OPTIONS
 
-    lines = [f"{tab}def {method_name}(self,", f"{tab2}*,"]
+    lines = [f"{tab}def to_{friendly_name}(self,", f"{tab2}*,"]
     lines.extend(render_params(params))
     lines.append(f"{tab}) -> {ret_type}:")
-    lines.append(f"{tab2}return self.{conv_method}(")
+    lines.append(f"{tab2}return self.{method}(")
     lines.append(f'{tab3}"{internal_name}",')
     lines.extend(render_call_args(params))
     lines.append(f"{tab2})")
@@ -201,12 +221,12 @@ def main():
         from_class.extend(render_to_method(friendly_name, internal_name))
 
     for friendly_name, internal_name in from_format_mapping.items():
-        text_class.extend(render_from_property(friendly_name, internal_name))
+        document_class.extend(render_from_property(friendly_name, internal_name))
 
     with open(init_file, "w") as f:
         f.write(preamble)
         f.write("\n".join(from_class))
-        f.write("\n".join(text_class))
+        f.write("\n".join(document_class))
         f.write(convert_func)
 
     print(f"Generated {init_file}")
