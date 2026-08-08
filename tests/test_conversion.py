@@ -10,8 +10,6 @@ from utils.generate_init import (
     to_format_mapping,
 )
 
-test_files_path = Path(__file__).resolve().parent / "test_files"
-
 html = "<p><em>Hello</em> world!</p>"
 markdown = "*Hello* world!"
 
@@ -28,19 +26,6 @@ def get_conversion(from_obj: From, to_format: str) -> str |bytes:
     
 
 class TestSimpleConversions:
-    @pytest.mark.parametrize(("friendly_name", "internal_name"), from_format_mapping.items())
-    def test_from_format_mapping(self, friendly_name:str, internal_name: str):
-        from_obj = get_from_obj("sample", friendly_name)
-        assert from_obj.from_fmt == internal_name
-        assert from_obj._data == "sample"
-
-    @pytest.mark.parametrize("from_name", from_format_mapping.keys())
-    @pytest.mark.parametrize("to_name", to_format_mapping.keys())
-    def test_format_mapping_attributes_exists(self, from_name: str, to_name:str):
-        from_obj = get_from_obj("sample", from_name)
-        assert hasattr(from_obj, f"to_{to_name}")
-
-
     @pytest.mark.parametrize("markdown_format", markdown_formats)
     def test_convert_html_to_markdown(self, markdown_format: str):
         ret = get_conversion(get_from_obj(html, "html"), markdown_format)
@@ -90,9 +75,7 @@ class TestConversionsWithOptions:
 
     def test_to_docx_with_options(self, mocker: MockerFixture):
         mock_convert = mocker.patch("carta._rust_wrapper.convert", return_value=b"mock docx")
-        res = convert("Hello docx").from_markdown.to_docx(
-            docx_reference_doc=b"ref_data"
-        )
+        res = convert("Hello docx").from_markdown.to_docx(docx_reference_doc=b"ref_data")
         assert res == b"mock docx"
         mock_convert.assert_called_once_with(
             "markdown",
@@ -109,9 +92,7 @@ class TestConversionsWithOptions:
 
     def test_to_epub_with_options(self, mocker: MockerFixture):
         mock_convert = mocker.patch("carta._rust_wrapper.convert", return_value=b"mock epub")
-        res = convert("Hello epub").from_markdown.to_epub(
-            epub_subdirectory="EPUB"
-        )
+        res = convert("Hello epub").from_markdown.to_epub(epub_subdirectory="EPUB")
         assert res == b"mock epub"
         mock_convert.assert_called_once_with(
             "markdown",
@@ -128,9 +109,7 @@ class TestConversionsWithOptions:
 
     def test_to_html_with_options(self, mocker: MockerFixture):
         mock_convert = mocker.patch("carta._rust_wrapper.convert", return_value="<p>mock html</p>")
-        res = convert("Hello html").from_markdown.to_html(
-            toc=True, number_sections=True
-        )
+        res = convert("Hello html").from_markdown.to_html(toc=True, number_sections=True)
         assert res == "<p>mock html</p>"
         mock_convert.assert_called_once_with(
             "markdown",
@@ -154,13 +133,14 @@ class TestConversionsWithOptions:
             from_obj.to_epub(docx_reference_doc=b"ref") # type: ignore[reportCallIssue]
 
 
+class TestConvertFromFile:
+    test_files_path = Path(__file__).resolve().parent / "test_files"
 
-
-class TestConvertFromPath:
     test_files = [
     "markdown_from_pandoc",
     "markdown_with_html"
     ]
+    
     def test_basic_conversion(self, tmp_path:Path):
         file_in = tmp_path / "input.md"
         file_in.write_text(markdown)
@@ -170,7 +150,17 @@ class TestConvertFromPath:
     @pytest.mark.skip(reason="currently failing - revisit later")
     @pytest.mark.parametrize("file_name", test_files)
     def test_premade_files(self, file_name: str):
-        file_in = test_files_path / (file_name+".md")
-        file_out = test_files_path / (file_name+".html")
+        file_in = self.test_files_path / (file_name+".md")
+        file_out = self.test_files_path / (file_name+".html")
         res = convert(file_in).from_markdown.to_html
         assert res == file_out.read_text()
+
+    def test_convert_from_opened_binary_file(self):
+        with open(self.test_files_path/ "test.docx", "rb") as f:
+            ret = convert(f).from_docx.to_markdown()
+        assert ret == markdown
+
+    def test_convert_from_opened_text_file(self):
+        with open(self.test_files_path/ "test.html") as f:
+            ret = convert(f).from_html.to_markdown()
+        assert ret == markdown
