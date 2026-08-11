@@ -42,6 +42,8 @@ formats = {
     "asciidoc",
     "beamer",
     "revealjs",
+    "typst",
+    "docbook"
 }
 
 format_mapping_extras = {
@@ -59,7 +61,7 @@ docx_formats = {"docx"}
 odt_formats = {"odt"}
 binary_formats = epub_formats | docx_formats | odt_formats
 
-input_only_formats = {"html5", "csv", "tsv"}
+input_only_formats = {"html5", "csv", "tsv", "typst"}
 output_only_formats = {"epub2", "epub3"}
 
 

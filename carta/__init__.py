@@ -205,6 +205,47 @@ class From:
             extensions=extensions,
         )
 
+    def to_docbook(self,
+        *,
+        wrap: WrapMode | None = None,
+        columns: int | None = None,
+        number_sections: bool = False,
+        toc: bool = False,
+        toc_depth: int | None = None,
+        math_method: MathMethod | None = None,
+        math_url: str | None = None,
+        standalone: bool = False,
+        template: str | None = None,
+        template_dir: str | None = None,
+        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
+        highlight_style: str | None = None,
+        no_highlight: bool = False,
+        idiomatic_highlight: bool = False,
+        greedy_paragraphs: bool = False,
+        extensions: Sequence[Extension] | Extension | str | None = None,
+    ) -> str:
+        return self._convert_to_text(
+            "docbook",
+            wrap=wrap,
+            columns=columns,
+            number_sections=number_sections,
+            toc=toc,
+            toc_depth=toc_depth,
+            math_method=math_method,
+            math_url=math_url,
+            standalone=standalone,
+            template=template,
+            template_dir=template_dir,
+            variables=variables,
+            metadata=metadata,
+            highlight_style=highlight_style,
+            no_highlight=no_highlight,
+            idiomatic_highlight=idiomatic_highlight,
+            greedy_paragraphs=greedy_paragraphs,
+            extensions=extensions,
+        )
+
     def to_docx(self,
         *,
         wrap: WrapMode | None = None,
@@ -1303,47 +1344,6 @@ class From:
             extensions=extensions,
         )
 
-    def to_typst(self,
-        *,
-        wrap: WrapMode | None = None,
-        columns: int | None = None,
-        number_sections: bool = False,
-        toc: bool = False,
-        toc_depth: int | None = None,
-        math_method: MathMethod | None = None,
-        math_url: str | None = None,
-        standalone: bool = False,
-        template: str | None = None,
-        template_dir: str | None = None,
-        variables: dict[str, str] | Sequence[tuple[str, str]] | None = None,
-        metadata: dict[str, str] | Sequence[tuple[str, str]] | None = None,
-        highlight_style: str | None = None,
-        no_highlight: bool = False,
-        idiomatic_highlight: bool = False,
-        greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
-    ) -> str:
-        return self._convert_to_text(
-            "typst",
-            wrap=wrap,
-            columns=columns,
-            number_sections=number_sections,
-            toc=toc,
-            toc_depth=toc_depth,
-            math_method=math_method,
-            math_url=math_url,
-            standalone=standalone,
-            template=template,
-            template_dir=template_dir,
-            variables=variables,
-            metadata=metadata,
-            highlight_style=highlight_style,
-            no_highlight=no_highlight,
-            idiomatic_highlight=idiomatic_highlight,
-            greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
-        )
-
     def to_github_markdown(self,
         *,
         wrap: WrapMode | None = None,
@@ -1664,6 +1664,10 @@ class Document:
     @property
     def from_csv(self):
         return From(self, "csv")
+
+    @property
+    def from_docbook(self):
+        return From(self, "docbook")
 
     @property
     def from_docx(self):
