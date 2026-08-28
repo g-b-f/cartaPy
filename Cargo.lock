@@ -105,9 +105,9 @@ checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
 
 [[package]]
 name = "carta"
-version = "0.0.9"
+version = "0.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a186df946e984678940fba5058b3bf5d5620336553a8f712363394d0f18ce3b"
+checksum = "bfeb9f9f706dd867e691504c953c57e52f22f3ced8b0e86ce1808d6bc155da4c"
 dependencies = [
  "carta-ast",
  "carta-core",
@@ -124,9 +124,9 @@ dependencies = [
 
 [[package]]
 name = "carta-ast"
-version = "0.0.9"
+version = "0.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c7b33b2d00a1818cc987001305fe0a60b0470cd0b7206a2c4f745896baf93ae"
+checksum = "1bbe5cd7642ba66de50b6f413bbc3eedc826a7944637d498b68d8016fe445b05"
 dependencies = [
  "compact_str",
  "itoa",
@@ -140,9 +140,9 @@ dependencies = [
 
 [[package]]
 name = "carta-core"
-version = "0.0.9"
+version = "0.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f076633ab1ddcc30aa473f797c400972107d678e5415957dd3eb4c9785d3b80"
+checksum = "23d93637d8dcec80df6256756cfc089a3c9e0a4c34a6500df40762e586d48f8a"
 dependencies = [
  "carta-ast",
  "carta-highlight",
@@ -153,9 +153,9 @@ dependencies = [
 
 [[package]]
 name = "carta-highlight"
-version = "0.0.9"
+version = "0.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d4c662515d851c1e8634a80c33d5ddb59c7449c805900d998d1a5f9ce46d571"
+checksum = "67e7aa43afa60eb1c97f08dccd0f90d99c0d6b4dd38da5d22ea3962236d0f062"
 dependencies = [
  "fancy-regex",
  "miniz_oxide",
@@ -166,16 +166,15 @@ dependencies = [
 
 [[package]]
 name = "carta-readers"
-version = "0.0.9"
+version = "0.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcf379402d426675dc8153d2ab83c9d6faa224b5e41cdd8a5269c48ac33c641b"
+checksum = "a0d15fa1ad2072cca266607a1b13a1a1b9dc5176caeb7dc158a8cd7ea691bace"
 dependencies = [
  "carta-ast",
  "carta-core",
  "caseless",
  "fancy-regex",
  "memchr",
- "serde",
  "serde_json",
  "unicode-general-category",
  "unicode-normalization",
@@ -183,9 +182,9 @@ dependencies = [
 
 [[package]]
 name = "carta-writers"
-version = "0.0.9"
+version = "0.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14a64114e32000d62e88335fa52f3bf826ec0500d10f55c35e454a467ac83435"
+checksum = "9a7de73995c11daf583e30811e5ec825354a5194db3d9de8e6a9fba7c65d254a"
 dependencies = [
  "carta-ast",
  "carta-core",
@@ -196,7 +195,7 @@ dependencies = [
 
 [[package]]
 name = "cartapy"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "carta",
  "pyo3",

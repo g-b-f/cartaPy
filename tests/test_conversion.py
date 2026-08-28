@@ -68,10 +68,15 @@ class TestConversionsWithOptions:
         res = convert(input_md).from_markdown.to_html(number_sections=True)
         assert res == expected
 
-    def test_to_html_with_extensions(self):
-        input_md = "~~strikethrough~~"
-        res = convert(input_md).from_markdown.to_html(extensions=["strikeout"])
-        assert res == "<p><del>strikethrough</del></p>"
+    def test_enabled_extensions(self):
+        input_md = "some\ntext"
+        res = convert(input_md).from_markdown.to_html(extensions=["hard_line_breaks"])
+        assert res == "<p>some<br />\ntext</p>"
+
+    def test_disabled_extensions(self):
+        input_md = "<p><div>some text</div></p>"
+        res = convert(input_md).from_html.to_gfm(extensions=["-raw_html"])
+        assert res == "some text"
 
     def test_to_docx_with_options(self, mocker: MockerFixture):
         mock_convert = mocker.patch("carta._rust_wrapper.convert", return_value=b"mock docx")
