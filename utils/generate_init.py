@@ -78,7 +78,7 @@ preamble = """# generated programmatically. Do not edit.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Iterable
 from io import TextIOWrapper, BufferedReader
 
 from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
@@ -184,14 +184,14 @@ GLOBAL_OPTIONS = [
     ("standalone", "bool", "False"),
     ("template", "str | None", "None"),
     ("template_dir", "str | None", "None"),
-    ("variables", "dict[str, str] | Sequence[tuple[str, str]] | None", "None"),
-    ("metadata", "dict[str, str] | Sequence[tuple[str, str]] | None", "None"),
+    ("variables", "dict[str, str] | Iterable[tuple[str, str]] | None", "None"),
+    ("metadata", "dict[str, str] | Iterable[tuple[str, str]] | None", "None"),
     ("highlight_style", "str | None", "None"),
     ("no_highlight", "bool", "False"),
     ("idiomatic_highlight", "bool", "False"),
     ("greedy_paragraphs", "bool", "False"),
-    ("enable_extensions", "Sequence[Extension] | Extension | str | None", "None"),
-    ("disable_extensions", "Sequence[Extension] | Extension | str | None", "None"),
+    ("enable_extensions", "Iterable[Extension] | Extension | str | None", "None"),
+    ("disable_extensions", "Iterable[Extension] | Extension | str | None", "None"),
 ]
 
 EPUB_OPTIONS = [
@@ -199,7 +199,7 @@ EPUB_OPTIONS = [
     ("epub_metadata_xml", "str | None", "None"),
     ("epub_subdirectory", "str | None", "None"),
     ("epub_split_level", "int | None", "None"),
-    ("epub_stylesheets", "Sequence[str] | None", "None"),
+    ("epub_stylesheets", "Iterable[str] | None", "None"),
 ]
 
 DOCX_OPTIONS = [
