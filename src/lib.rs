@@ -1,9 +1,14 @@
+use std::env;
 use std::sync::Arc;
 use pyo3::exceptions::{PyRuntimeError, PyTypeError};
 use pyo3::prelude::*;
 use pyo3::types::{PyBytes, PyString};
 use carta;
 
+#[pyfunction]
+fn get_binary_version() -> PyResult<&'static str> {
+    Ok(env!("CARGO_PKG_VERSION"))
+}
 
 fn build_options(
     wrap: Option<&str>,
@@ -258,8 +263,10 @@ fn convert(
     }
 }
 
+
 #[pymodule]
 fn _rust_wrapper(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(convert, m)?)?;
+    m.add_function(wrap_pyfunction!(get_binary_version, m)?)?;
     Ok(())
 }

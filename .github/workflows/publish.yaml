@@ -256,7 +256,9 @@ jobs:
         - name: Import and smoke test
           run: |
             python -c '
-            from carta import convert
+            from carta import convert, get_binary_version
+
+            print(get_binary_version(), flush=True)
 
             html = "<p><em>Hello</em> world!</p>"
             markdown = "*Hello* world!"

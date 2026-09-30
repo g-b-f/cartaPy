@@ -84,6 +84,9 @@ from io import TextIOWrapper, BufferedReader
 from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
 from .options import Extension, MathMethod, WrapMode
 
+def _get_binary_version() -> str:
+    return _rust_wrapper.get_binary_version()
+
 """
 
 convert_func = """

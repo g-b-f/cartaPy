@@ -1,4 +1,8 @@
 from utils.generate_init import init_file, main
+from carta import _get_binary_version
+
+def test_binary_version():
+    print(f"binary_version: {_get_binary_version()}")
 
 
 def test_generate_init_has_been_run():
