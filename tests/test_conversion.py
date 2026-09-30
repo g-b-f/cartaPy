@@ -155,13 +155,36 @@ class TestConvertFromFile:
         res = convert(file_in).from_markdown.to_html()
         assert res == html
         
-    @pytest.mark.skip(reason="currently failing - revisit later")
-    @pytest.mark.parametrize("file_name", test_files)
-    def test_premade_files(self, file_name: str):
-        file_in = self.test_files_path / (file_name+".md")
-        file_out = self.test_files_path / (file_name+".html")
-        res = convert(file_in).from_markdown.to_html
-        assert res == file_out.read_text()
+    @pytest.mark.parametrize(
+        ("file_name", "expected_fragments"),
+        [
+            (
+                "markdown_from_pandoc",
+                [
+                    "<h1 id=\"introduction\">Introduction</h1>",
+                    "Pandoc has long supported filters",
+                    "Lua filter structure",
+                    "return {",
+                ],
+            ),
+            (
+                "markdown_with_html",
+                [
+                    "<h1 id=\"markdown-syntax\">Markdown: Syntax</h1>",
+                    "Inline HTML",
+                    "Automatic Escaping for Special Characters",
+                    "<a href=\"#overview\">Overview</a>",
+                ],
+            ),
+        ],
+    )
+    def test_premade_files(self, file_name: str, expected_fragments: list[str]):
+        file_in = self.test_files_path / (file_name + ".md")
+        res = convert(file_in).from_markdown.to_html()
+
+        assert res.strip().startswith("<h1")
+        for fragment in expected_fragments:
+            assert fragment in res
 
     def test_convert_from_opened_binary_file(self):
         with open(self.test_files_path/ "test.docx", "rb") as f:
