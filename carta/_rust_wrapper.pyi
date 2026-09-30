@@ -1,5 +1,8 @@
 from typing import Sequence
 
+def get_binary_version() -> str:
+    ...
+
 def convert(
     from_format: str,
     to_format: str,

@@ -25,3 +25,4 @@ def _load_extension():
 
 _ext = _load_extension()
 convert = _ext.convert
+get_binary_version = _ext.get_binary_version

@@ -78,11 +78,14 @@ preamble = """# generated programmatically. Do not edit.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Iterable
 from io import TextIOWrapper, BufferedReader
 
 from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
 from .options import Extension, MathMethod, WrapMode
+
+def _get_binary_version() -> str:
+    return _rust_wrapper.get_binary_version()
 
 """
 
@@ -115,19 +118,40 @@ class From:
             not_none["variables"] = list(not_none["variables"].items())
         if "metadata" in not_none and isinstance(not_none["metadata"], dict):
             not_none["metadata"] = list(not_none["metadata"].items())
-        if "extensions" in not_none:
-            exts = not_none["extensions"]
-            if isinstance(exts, str):
-                not_none["extensions"] = [exts]
-            elif isinstance(exts, (set, tuple)):
-                not_none["extensions"] = list(exts)
+        for key in ("enable_extensions", "disable_extensions"):
+            if key in not_none:
+                exts = not_none[key]
+                if isinstance(exts, str):
+                    not_none[key] = [exts]
+                elif isinstance(exts, (set, tuple)):
+                    not_none[key] = list(exts)
         return not_none
 
+    @staticmethod
+    def _with_disabled_extensions(format_name: str, disable_extensions: list[str]) -> str:
+        # Disabled extensions are applied as `-ext` format-spec toggles, the only
+        # removal path `carta` honors (the options union cannot subtract from a
+        # format's default extension set).
+        spec = format_name
+        for ext in disable_extensions:
+            spec += f"-{ext.lstrip('-')}"
+        return spec
+
     def _convert_to_text(self, to: str, **kwargs: Any) -> str:
-        return _rust_wrapper.convert(self.from_format, to, self._document._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
+        kwargs = self._prepare_kwargs(kwargs)
+        disable_extensions = kwargs.pop("disable_extensions", None) or []
+        enable_extensions = kwargs.pop("enable_extensions", None)
+        from_spec = self._with_disabled_extensions(self.from_format, disable_extensions)
+        to_spec = self._with_disabled_extensions(to, disable_extensions)
+        return _rust_wrapper.convert(from_spec, to_spec, self._document._data, extensions=enable_extensions, **kwargs) # type: ignore[return-value]
 
     def _convert_to_bytes(self, to: str, **kwargs: Any) -> bytes:
-        return _rust_wrapper.convert(self.from_format, to, self._document._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
+        kwargs = self._prepare_kwargs(kwargs)
+        disable_extensions = kwargs.pop("disable_extensions", None) or []
+        enable_extensions = kwargs.pop("enable_extensions", None)
+        from_spec = self._with_disabled_extensions(self.from_format, disable_extensions)
+        to_spec = self._with_disabled_extensions(to, disable_extensions)
+        return _rust_wrapper.convert(from_spec, to_spec, self._document._data, extensions=enable_extensions, **kwargs) # type: ignore[return-value]
 """
 ]
 
@@ -160,13 +184,14 @@ GLOBAL_OPTIONS = [
     ("standalone", "bool", "False"),
     ("template", "str | None", "None"),
     ("template_dir", "str | None", "None"),
-    ("variables", "dict[str, str] | Sequence[tuple[str, str]] | None", "None"),
-    ("metadata", "dict[str, str] | Sequence[tuple[str, str]] | None", "None"),
+    ("variables", "dict[str, str] | None", "None"),
+    ("metadata", "dict[str, str] | None", "None"),
     ("highlight_style", "str | None", "None"),
     ("no_highlight", "bool", "False"),
     ("idiomatic_highlight", "bool", "False"),
     ("greedy_paragraphs", "bool", "False"),
-    ("extensions", "Sequence[Extension] | Extension | str | None", "None"),
+    ("enable_extensions", "Iterable[Extension] | None", "None"),
+    ("disable_extensions", "Iterable[Extension] | None", "None"),
 ]
 
 EPUB_OPTIONS = [
@@ -174,7 +199,7 @@ EPUB_OPTIONS = [
     ("epub_metadata_xml", "str | None", "None"),
     ("epub_subdirectory", "str | None", "None"),
     ("epub_split_level", "int | None", "None"),
-    ("epub_stylesheets", "Sequence[str] | None", "None"),
+    ("epub_stylesheets", "list[str] | tuple[str] | set[str] | None", "None"),
 ]
 
 DOCX_OPTIONS = [

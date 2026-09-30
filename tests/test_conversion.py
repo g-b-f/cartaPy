@@ -70,12 +70,12 @@ class TestConversionsWithOptions:
 
     def test_enabled_extensions(self):
         input_md = "some\ntext"
-        res = convert(input_md).from_markdown.to_html(extensions=["hard_line_breaks"])
+        res = convert(input_md).from_markdown.to_html(enable_extensions=["hard_line_breaks"])
         assert res == "<p>some<br />\ntext</p>"
 
     def test_disabled_extensions(self):
         input_md = "<p><div>some text</div></p>"
-        res = convert(input_md).from_html.to_gfm(extensions=["-raw_html"])
+        res = convert(input_md).from_html.to_gfm(disable_extensions=["raw_html"])
         assert res == "some text"
 
     def test_to_docx_with_options(self, mocker: MockerFixture):
@@ -92,6 +92,7 @@ class TestConversionsWithOptions:
             no_highlight=False,
             idiomatic_highlight=False,
             greedy_paragraphs=False,
+            extensions=None,
             docx_reference_doc=b"ref_data",
         )
 
@@ -109,6 +110,7 @@ class TestConversionsWithOptions:
             no_highlight=False,
             idiomatic_highlight=False,
             greedy_paragraphs=False,
+            extensions=None,
             epub_subdirectory="EPUB",
         )
 
@@ -126,6 +128,7 @@ class TestConversionsWithOptions:
             no_highlight=False,
             idiomatic_highlight=False,
             greedy_paragraphs=False,
+            extensions=None,
         )
 
     def test_invalid_option_raises_type_error(self):
