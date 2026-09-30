@@ -23,11 +23,21 @@ markdown_with_options = convert(html).from_html.to_markdown(
     toc=True,
     wrap="None",
 )
+```
+
+Likewise for working with files:
+
+```python
+from carta import convert
+from pathlib import Path
+
+markdown_path = Path("example.md")
+html = convert(docx_path).from_markdown.to_html()
+
+with open("example.epub", "wb") as f:
+    docx = convert(html).from_html.to_epub()
+    f.write(docx)
 
 with open("example.docx", "rb") as f:
-    html = convert(f).from_docx.to_html()
-
-with open("example.docx", "wb") as f:
-    docx = convert(html).from_html.to_docx()
-    f.write(docx)
+    markdown = convert(f).from_docx.to_markdown()
 ```
