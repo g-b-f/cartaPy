@@ -118,19 +118,40 @@ class From:
             not_none["variables"] = list(not_none["variables"].items())
         if "metadata" in not_none and isinstance(not_none["metadata"], dict):
             not_none["metadata"] = list(not_none["metadata"].items())
-        if "extensions" in not_none:
-            exts = not_none["extensions"]
-            if isinstance(exts, str):
-                not_none["extensions"] = [exts]
-            elif isinstance(exts, (set, tuple)):
-                not_none["extensions"] = list(exts)
+        for key in ("enable_extensions", "disable_extensions"):
+            if key in not_none:
+                exts = not_none[key]
+                if isinstance(exts, str):
+                    not_none[key] = [exts]
+                elif isinstance(exts, (set, tuple)):
+                    not_none[key] = list(exts)
         return not_none
 
+    @staticmethod
+    def _with_disabled_extensions(format_name: str, disable_extensions: list[str]) -> str:
+        # Disabled extensions are applied as `-ext` format-spec toggles, the only
+        # removal path `carta` honors (the options union cannot subtract from a
+        # format's default extension set).
+        spec = format_name
+        for ext in disable_extensions:
+            spec += f"-{ext.lstrip('-')}"
+        return spec
+
     def _convert_to_text(self, to: str, **kwargs: Any) -> str:
-        return _rust_wrapper.convert(self.from_format, to, self._document._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
+        kwargs = self._prepare_kwargs(kwargs)
+        disable_extensions = kwargs.pop("disable_extensions", None) or []
+        enable_extensions = kwargs.pop("enable_extensions", None)
+        from_spec = self._with_disabled_extensions(self.from_format, disable_extensions)
+        to_spec = self._with_disabled_extensions(to, disable_extensions)
+        return _rust_wrapper.convert(from_spec, to_spec, self._document._data, extensions=enable_extensions, **kwargs) # type: ignore[return-value]
 
     def _convert_to_bytes(self, to: str, **kwargs: Any) -> bytes:
-        return _rust_wrapper.convert(self.from_format, to, self._document._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
+        kwargs = self._prepare_kwargs(kwargs)
+        disable_extensions = kwargs.pop("disable_extensions", None) or []
+        enable_extensions = kwargs.pop("enable_extensions", None)
+        from_spec = self._with_disabled_extensions(self.from_format, disable_extensions)
+        to_spec = self._with_disabled_extensions(to, disable_extensions)
+        return _rust_wrapper.convert(from_spec, to_spec, self._document._data, extensions=enable_extensions, **kwargs) # type: ignore[return-value]
 """
 ]
 
@@ -169,7 +190,8 @@ GLOBAL_OPTIONS = [
     ("no_highlight", "bool", "False"),
     ("idiomatic_highlight", "bool", "False"),
     ("greedy_paragraphs", "bool", "False"),
-    ("extensions", "Sequence[Extension] | Extension | str | None", "None"),
+    ("enable_extensions", "Sequence[Extension] | Extension | str | None", "None"),
+    ("disable_extensions", "Sequence[Extension] | Extension | str | None", "None"),
 ]
 
 EPUB_OPTIONS = [

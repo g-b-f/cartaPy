@@ -40,26 +40,14 @@ fn build_options(
 
     let mut writer_options = carta::WriterOptions::default();
 
+    // Enabled extensions merge into the options union (additive). Disabled
+    // extensions are applied by the caller as `-ext` format-spec toggles, since
+    // the options union cannot subtract from a format's default extension set.
     if let Some(extension_list) = extensions {
         for extension in extension_list {
-            let (is_remove, clean_name) = if extension.starts_with('-') {
-                (true, &extension[1..])
-            }
-            else if extension.starts_with('+') {
-                (false, &extension[1..])
-            }
-            else {
-                (false, extension.as_str())
-            };
-
-            let Some(ext) = carta::Extension::from_name(clean_name) else { continue };
-            if is_remove {
-                reader_options.extensions.remove(ext);
-                writer_options.extensions.remove(ext);
-            } else {
-                reader_options.extensions.insert(ext);
-                writer_options.extensions.insert(ext);
-            }
+            let Some(ext) = carta::Extension::from_name(extension.as_str()) else { continue };
+            reader_options.extensions.insert(ext);
+            writer_options.extensions.insert(ext);
         }
     }
 

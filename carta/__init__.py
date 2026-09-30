@@ -30,19 +30,40 @@ class From:
             not_none["variables"] = list(not_none["variables"].items())
         if "metadata" in not_none and isinstance(not_none["metadata"], dict):
             not_none["metadata"] = list(not_none["metadata"].items())
-        if "extensions" in not_none:
-            exts = not_none["extensions"]
-            if isinstance(exts, str):
-                not_none["extensions"] = [exts]
-            elif isinstance(exts, (set, tuple)):
-                not_none["extensions"] = list(exts)
+        for key in ("enable_extensions", "disable_extensions"):
+            if key in not_none:
+                exts = not_none[key]
+                if isinstance(exts, str):
+                    not_none[key] = [exts]
+                elif isinstance(exts, (set, tuple)):
+                    not_none[key] = list(exts)
         return not_none
 
+    @staticmethod
+    def _with_disabled_extensions(format_name: str, disable_extensions: list[str]) -> str:
+        # Disabled extensions are applied as `-ext` format-spec toggles, the only
+        # removal path `carta` honors (the options union cannot subtract from a
+        # format's default extension set).
+        spec = format_name
+        for ext in disable_extensions:
+            spec += f"-{ext.lstrip('-')}"
+        return spec
+
     def _convert_to_text(self, to: str, **kwargs: Any) -> str:
-        return _rust_wrapper.convert(self.from_format, to, self._document._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
+        kwargs = self._prepare_kwargs(kwargs)
+        disable_extensions = kwargs.pop("disable_extensions", None) or []
+        enable_extensions = kwargs.pop("enable_extensions", None)
+        from_spec = self._with_disabled_extensions(self.from_format, disable_extensions)
+        to_spec = self._with_disabled_extensions(to, disable_extensions)
+        return _rust_wrapper.convert(from_spec, to_spec, self._document._data, extensions=enable_extensions, **kwargs) # type: ignore[return-value]
 
     def _convert_to_bytes(self, to: str, **kwargs: Any) -> bytes:
-        return _rust_wrapper.convert(self.from_format, to, self._document._data, **self._prepare_kwargs(kwargs)) # type: ignore[return-value]
+        kwargs = self._prepare_kwargs(kwargs)
+        disable_extensions = kwargs.pop("disable_extensions", None) or []
+        enable_extensions = kwargs.pop("enable_extensions", None)
+        from_spec = self._with_disabled_extensions(self.from_format, disable_extensions)
+        to_spec = self._with_disabled_extensions(to, disable_extensions)
+        return _rust_wrapper.convert(from_spec, to_spec, self._document._data, extensions=enable_extensions, **kwargs) # type: ignore[return-value]
 
     def to_asciidoc(self,
         *,
@@ -62,7 +83,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "asciidoc",
@@ -82,7 +104,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_beamer(self,
@@ -103,7 +126,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "beamer",
@@ -123,7 +147,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_commonmark(self,
@@ -144,7 +169,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "commonmark",
@@ -164,7 +190,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_commonmark_x(self,
@@ -185,7 +212,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "commonmark_x",
@@ -205,7 +233,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_docbook(self,
@@ -226,7 +255,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "docbook",
@@ -246,7 +276,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_docx(self,
@@ -267,7 +298,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
         docx_reference_doc: bytes | None = None,
     ) -> bytes:
         return self._convert_to_bytes(
@@ -288,7 +320,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
             docx_reference_doc=docx_reference_doc,
         )
 
@@ -310,7 +343,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "dokuwiki",
@@ -330,7 +364,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_epub(self,
@@ -351,7 +386,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
         epub_cover_image: bytes | None = None,
         epub_metadata_xml: str | None = None,
         epub_subdirectory: str | None = None,
@@ -376,7 +412,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
             epub_cover_image=epub_cover_image,
             epub_metadata_xml=epub_metadata_xml,
             epub_subdirectory=epub_subdirectory,
@@ -402,7 +439,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
         epub_cover_image: bytes | None = None,
         epub_metadata_xml: str | None = None,
         epub_subdirectory: str | None = None,
@@ -427,7 +465,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
             epub_cover_image=epub_cover_image,
             epub_metadata_xml=epub_metadata_xml,
             epub_subdirectory=epub_subdirectory,
@@ -453,7 +492,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
         epub_cover_image: bytes | None = None,
         epub_metadata_xml: str | None = None,
         epub_subdirectory: str | None = None,
@@ -478,7 +518,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
             epub_cover_image=epub_cover_image,
             epub_metadata_xml=epub_metadata_xml,
             epub_subdirectory=epub_subdirectory,
@@ -504,7 +545,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "gfm",
@@ -524,7 +566,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_html(self,
@@ -545,7 +588,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "html",
@@ -565,7 +609,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_html4(self,
@@ -586,7 +631,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "html4",
@@ -606,7 +652,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_ipynb(self,
@@ -627,7 +674,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "ipynb",
@@ -647,7 +695,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_jira(self,
@@ -668,7 +717,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "jira",
@@ -688,7 +738,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_json(self,
@@ -709,7 +760,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "json",
@@ -729,7 +781,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_latex(self,
@@ -750,7 +803,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "latex",
@@ -770,7 +824,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_man(self,
@@ -791,7 +846,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "man",
@@ -811,7 +867,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_markdown(self,
@@ -832,7 +889,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "markdown",
@@ -852,7 +910,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_markdown_mmd(self,
@@ -873,7 +932,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "markdown_mmd",
@@ -893,7 +953,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_markdown_phpextra(self,
@@ -914,7 +975,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "markdown_phpextra",
@@ -934,7 +996,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_markdown_strict(self,
@@ -955,7 +1018,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "markdown_strict",
@@ -975,7 +1039,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_mediawiki(self,
@@ -996,7 +1061,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "mediawiki",
@@ -1016,7 +1082,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_native(self,
@@ -1037,7 +1104,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "native",
@@ -1057,7 +1125,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_odt(self,
@@ -1078,7 +1147,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> bytes:
         return self._convert_to_bytes(
             "odt",
@@ -1098,7 +1168,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_opml(self,
@@ -1119,7 +1190,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "opml",
@@ -1139,7 +1211,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_org(self,
@@ -1160,7 +1233,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "org",
@@ -1180,7 +1254,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_plain(self,
@@ -1201,7 +1276,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "plain",
@@ -1221,7 +1297,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_revealjs(self,
@@ -1242,7 +1319,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "revealjs",
@@ -1262,7 +1340,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_rst(self,
@@ -1283,7 +1362,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "rst",
@@ -1303,7 +1383,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_rtf(self,
@@ -1324,7 +1405,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "rtf",
@@ -1344,7 +1426,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_github_markdown(self,
@@ -1365,7 +1448,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "gfm",
@@ -1385,7 +1469,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_markdown_github(self,
@@ -1406,7 +1491,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "gfm",
@@ -1426,7 +1512,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_jupyter(self,
@@ -1447,7 +1534,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "ipynb",
@@ -1467,7 +1555,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_jupyter_notebook(self,
@@ -1488,7 +1577,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "ipynb",
@@ -1508,7 +1598,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_restructured_text(self,
@@ -1529,7 +1620,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "rst",
@@ -1549,7 +1641,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_multimarkdown(self,
@@ -1570,7 +1663,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> str:
         return self._convert_to_text(
             "markdown_mmd",
@@ -1590,7 +1684,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
     def to_open_document_text(self,
@@ -1611,7 +1706,8 @@ class From:
         no_highlight: bool = False,
         idiomatic_highlight: bool = False,
         greedy_paragraphs: bool = False,
-        extensions: Sequence[Extension] | Extension | str | None = None,
+        enable_extensions: Sequence[Extension] | Extension | str | None = None,
+        disable_extensions: Sequence[Extension] | Extension | str | None = None,
     ) -> bytes:
         return self._convert_to_bytes(
             "odt",
@@ -1631,7 +1727,8 @@ class From:
             no_highlight=no_highlight,
             idiomatic_highlight=idiomatic_highlight,
             greedy_paragraphs=greedy_paragraphs,
-            extensions=extensions,
+            enable_extensions=enable_extensions,
+            disable_extensions=disable_extensions,
         )
 
 @dataclass
