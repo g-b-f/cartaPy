@@ -184,14 +184,14 @@ GLOBAL_OPTIONS = [
     ("standalone", "bool", "False"),
     ("template", "str | None", "None"),
     ("template_dir", "str | None", "None"),
-    ("variables", "dict[str, str] | Iterable[tuple[str, str]] | None", "None"),
-    ("metadata", "dict[str, str] | Iterable[tuple[str, str]] | None", "None"),
+    ("variables", "dict[str, str] | None", "None"),
+    ("metadata", "dict[str, str] | None", "None"),
     ("highlight_style", "str | None", "None"),
     ("no_highlight", "bool", "False"),
     ("idiomatic_highlight", "bool", "False"),
     ("greedy_paragraphs", "bool", "False"),
-    ("enable_extensions", "Iterable[Extension] | Extension | str | None", "None"),
-    ("disable_extensions", "Iterable[Extension] | Extension | str | None", "None"),
+    ("enable_extensions", "Iterable[Extension] | None", "None"),
+    ("disable_extensions", "Iterable[Extension] | None", "None"),
 ]
 
 EPUB_OPTIONS = [
@@ -199,7 +199,7 @@ EPUB_OPTIONS = [
     ("epub_metadata_xml", "str | None", "None"),
     ("epub_subdirectory", "str | None", "None"),
     ("epub_split_level", "int | None", "None"),
-    ("epub_stylesheets", "Iterable[str] | None", "None"),
+    ("epub_stylesheets", "list[str] | tuple[str] | set[str] | None", "None"),
 ]
 
 DOCX_OPTIONS = [
