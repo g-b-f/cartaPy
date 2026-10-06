@@ -1,6 +1,6 @@
 [package]
 name = "cartapy"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2024"
 description = "Easy to use document converter"
 license = "MIT"
@@ -11,5 +11,5 @@ name = "_rust_wrapper"
 crate-type = ["cdylib"]
 
 [dependencies]
-carta = { version = "0.0.10", features = ["read-csv", "read-tsv"] }
+carta = { version = "0.0.11", features = ["read-csv", "read-tsv"] }
 pyo3 = "0.29.2"
