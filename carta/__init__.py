@@ -1907,7 +1907,12 @@ class Document:
 
 def convert(to_convert: str | bytes | Path | TextIOWrapper | BufferedReader):
     if isinstance(to_convert, Path):
-        to_convert = to_convert.read_text()
+        try:
+            return Document(to_convert.read_text())
+        except UnicodeDecodeError:
+            return Document(to_convert.read_bytes())
+        
     elif isinstance(to_convert, (TextIOWrapper, BufferedReader)):
-        to_convert = to_convert.read()
+        return Document(to_convert.read())
+    
     return Document(to_convert)

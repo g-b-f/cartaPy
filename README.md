@@ -31,13 +31,13 @@ Likewise for working with files:
 from carta import convert
 from pathlib import Path
 
-markdown_path = Path("example.md")
-html = convert(docx_path).from_markdown.to_html()
+docx_path = Path("example.docx")
+html = convert(docx_path).from_docx.to_html()
 
 with open("example.epub", "wb") as f:
-    docx = convert(html).from_html.to_epub()
-    f.write(docx)
+    epub = convert(html).from_html.to_epub()
+    f.write(epub)
 
-with open("example.docx", "rb") as f:
-    markdown = convert(f).from_docx.to_markdown()
+with open("example.epub", "rb") as f:
+    markdown = convert(f).from_epub.to_markdown()
 ```

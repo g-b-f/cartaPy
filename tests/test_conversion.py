@@ -195,3 +195,8 @@ class TestConvertFromFile:
         with open(self.test_files_path/ "test.html") as f:
             ret = convert(f).from_html.to_markdown()
         assert ret == markdown
+
+    def test_convert_from_binary_Path(self):
+        p = Path(self.test_files_path/ "test.docx").resolve()
+        ret = convert(p).from_docx.to_markdown()
+        assert ret == markdown
