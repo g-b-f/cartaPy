@@ -39,7 +39,6 @@ follow_untyped_imports = true
 [tool.maturin]
 include = ["carta/*"]
 bindings = "pyo3"
-compatibility = "abi3"
 
 [tool.ruff.lint]
 extend-select = [
