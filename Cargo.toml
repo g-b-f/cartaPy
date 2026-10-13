@@ -11,8 +11,9 @@ name = "_rust_wrapper"
 crate-type = ["cdylib"]
 
 [features]
-default = ["abi3-py312"]
-abi3-py312 = ["pyo3/abi3-py312"]
+default = ["abi3-py39"]
+abi3-py39 = ["pyo3/abi3-py39"]
+abi3-py314 = ["pyo3/abi3-py314"]
 
 [dependencies]
 carta = { version = "0.0.11", features = ["read-csv", "read-tsv"] }
