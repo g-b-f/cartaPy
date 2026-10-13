@@ -79,7 +79,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --no-abi3 -i python3.9 -i python3.10 -i python3.11
+          args: --release --out dist --no-default-features -i python3.9 -i python3.10 -i python3.11
           manylinux: auto
 
       - name: Install uv
@@ -127,7 +127,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --no-abi3 -i python3.9 -i python3.10 -i python3.11
+          args: --release --out dist --no-default-features -i python3.9 -i python3.10 -i python3.11
           manylinux: musllinux_1_2
       - name: Upload wheels
         uses: actions/upload-artifact@v7
@@ -174,7 +174,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --no-abi3 --find-interpreter
+          args: --release --out dist --no-default-features --find-interpreter
       - name: Upload wheels
         uses: actions/upload-artifact@v7
         with:
@@ -215,7 +215,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --no-abi3 --find-interpreter
+          args: --release --out dist --no-default-features --find-interpreter
       - name: Upload wheels
         uses: actions/upload-artifact@v7
         with:
@@ -247,7 +247,7 @@ jobs:
           uses: PyO3/maturin-action@v1
           with:
             target: ${{ matrix.platform }}
-            args: --release --out dist --no-abi3 -i python3.9 -i python3.10 -i python3.11
+            args: --release --out dist --no-default-features -i python3.9 -i python3.10 -i python3.11
         - name: Upload wheels
           uses: actions/upload-artifact@v7
           with:
