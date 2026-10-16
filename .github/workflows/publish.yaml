@@ -10,6 +10,10 @@ on:
 
 jobs:
   publish:
+    permissions:
+      id-token: write
+      contents: write
+      attestations: write
     uses: $/.github/workflows/maturin_publish.yaml
     with:
       package-name: cartapy
