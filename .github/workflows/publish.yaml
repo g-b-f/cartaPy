@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish:
-    uses: ./.github/workflows/reusable-maturin-publish.yaml
+    uses: $/.github/workflows/maturin_publish.yaml
     with:
       package-name: cartapy
       smoke-test-script: |
