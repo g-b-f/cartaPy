@@ -1,6 +1,6 @@
 [package]
 name = "cartapy"
-version = "2.1.0"
+version = "2.1.1"
 edition = "2024"
 description = "Easy to use document converter"
 license = "MIT"
@@ -13,7 +13,6 @@ crate-type = ["cdylib"]
 [features]
 default = ["abi3-py39"]
 abi3-py39 = ["pyo3/abi3-py39"]
-abi3-py314 = ["pyo3/abi3-py314"]
 
 [dependencies]
 carta = { version = "0.0.11", features = ["read-csv", "read-tsv"] }
