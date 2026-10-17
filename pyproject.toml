@@ -11,6 +11,7 @@ classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Python :: Implementation :: GraalPy",
 ]
 keywords = ["document", "converter", "conversion", "pandoc", "carta"]
 dynamic = ["version"]
@@ -37,7 +38,8 @@ check_untyped_defs = true
 follow_untyped_imports = true
 
 [tool.maturin]
-include = ["carta/*"] 
+include = ["carta/*"]
+bindings = "pyo3"
 
 [tool.ruff.lint]
 extend-select = [
