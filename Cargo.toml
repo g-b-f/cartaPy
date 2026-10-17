@@ -1,6 +1,6 @@
 [package]
 name = "cartapy"
-version = "2.1.1"
+version = "2.1.2"
 edition = "2024"
 description = "Easy to use document converter"
 license = "MIT"
