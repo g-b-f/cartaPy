@@ -32,3 +32,4 @@ jobs:
         assert expected_html == html, f"Expected: {html}, but got: {expected_html}"
     secrets:
       PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+
