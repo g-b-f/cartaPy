@@ -1,6 +1,6 @@
 [package]
 name = "cartapy"
-version = "2.1.2"
+version = "2.1.3"
 edition = "2024"
 description = "Easy to use document converter"
 license = "MIT"
@@ -16,4 +16,4 @@ abi3-py39 = ["pyo3/abi3-py39"]
 
 [dependencies]
 carta = { version = "0.0.11", features = ["read-csv", "read-tsv"] }
-pyo3 = { version = "0.29.3", features = ["extension-module"] }
+pyo3 = { version = "0.30.1", features = ["extension-module"] }
