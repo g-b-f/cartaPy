@@ -79,7 +79,7 @@ class TestConversionsWithOptions:
         assert res == "some text"
 
     def test_to_docx_with_options(self, mocker: MockerFixture):
-        mock_convert = mocker.patch("carta._rust_wrapper.convert", return_value=b"mock docx")
+        mock_convert = mocker.patch("carta._cartapy_rust_wrapper.convert", return_value=b"mock docx")
         res = convert("Hello docx").from_markdown.to_docx(docx_reference_doc=b"ref_data")
         assert res == b"mock docx"
         mock_convert.assert_called_once_with(
@@ -97,7 +97,7 @@ class TestConversionsWithOptions:
         )
 
     def test_to_epub_with_options(self, mocker: MockerFixture):
-        mock_convert = mocker.patch("carta._rust_wrapper.convert", return_value=b"mock epub")
+        mock_convert = mocker.patch("carta._cartapy_rust_wrapper.convert", return_value=b"mock epub")
         res = convert("Hello epub").from_markdown.to_epub(epub_subdirectory="EPUB")
         assert res == b"mock epub"
         mock_convert.assert_called_once_with(
@@ -115,7 +115,7 @@ class TestConversionsWithOptions:
         )
 
     def test_to_html_with_options(self, mocker: MockerFixture):
-        mock_convert = mocker.patch("carta._rust_wrapper.convert", return_value="<p>mock html</p>")
+        mock_convert = mocker.patch("carta._cartapy_rust_wrapper.convert", return_value="<p>mock html</p>")
         res = convert("Hello html").from_markdown.to_html(toc=True, number_sections=True)
         assert res == "<p>mock html</p>"
         mock_convert.assert_called_once_with(

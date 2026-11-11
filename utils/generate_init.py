@@ -78,14 +78,19 @@ preamble = """# generated programmatically. Do not edit.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any, Iterable
 from io import TextIOWrapper, BufferedReader
 
-from . import _rust_wrapper  # type: ignore[reportMissingModuleSource]
-from .options import Extension, MathMethod, WrapMode
+if TYPE_CHECKING:
+    from carta import _cartapy_rust_wrapper # type: ignore[reportMissingModuleSource]
+    from carta.options import Extension, MathMethod, WrapMode
+else:
+    import _cartapy_rust_wrapper
+    from .options import Extension, MathMethod, WrapMode
+
 
 def _get_binary_version() -> str:
-    return _rust_wrapper.get_binary_version()
+    return _cartapy_rust_wrapper.get_binary_version()
 
 """
 
@@ -148,7 +153,7 @@ class From:
         enable_extensions = kwargs.pop("enable_extensions", None)
         from_spec = self._with_disabled_extensions(self.from_format, disable_extensions)
         to_spec = self._with_disabled_extensions(to, disable_extensions)
-        return _rust_wrapper.convert(from_spec, to_spec, self._document._data, extensions=enable_extensions, **kwargs) # type: ignore[return-value]
+        return _cartapy_rust_wrapper.convert(from_spec, to_spec, self._document._data, extensions=enable_extensions, **kwargs) # type: ignore[return-value]
 
     def _convert_to_bytes(self, to: str, **kwargs: Any) -> bytes:
         kwargs = self._prepare_kwargs(kwargs)
@@ -156,7 +161,7 @@ class From:
         enable_extensions = kwargs.pop("enable_extensions", None)
         from_spec = self._with_disabled_extensions(self.from_format, disable_extensions)
         to_spec = self._with_disabled_extensions(to, disable_extensions)
-        return _rust_wrapper.convert(from_spec, to_spec, self._document._data, extensions=enable_extensions, **kwargs) # type: ignore[return-value]
+        return _cartapy_rust_wrapper.convert(from_spec, to_spec, self._document._data, extensions=enable_extensions, **kwargs) # type: ignore[return-value]
 """
 ]
 

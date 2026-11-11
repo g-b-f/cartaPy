@@ -253,7 +253,7 @@ fn convert(
 
 
 #[pymodule]
-fn _rust_wrapper(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _cartapy_rust_wrapper(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(convert, m)?)?;
     m.add_function(wrap_pyfunction!(get_binary_version, m)?)?;
     Ok(())
