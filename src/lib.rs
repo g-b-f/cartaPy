@@ -90,6 +90,7 @@ fn build_options(
                 highlighter: Some(Arc::new(highlighter)),
                 theme: Some(theme),
                 idiomatic: false,
+                disable_native: false
             };
         } else if let Ok(bytes) = std::fs::read(&style) {
             let theme = carta::Theme::from_json(&bytes)
@@ -99,6 +100,7 @@ fn build_options(
                 highlighter: Some(Arc::new(highlighter)),
                 theme: Some(theme),
                 idiomatic: false,
+                disable_native: false
             };
         } else {
             return Err(PyRuntimeError::new_err(format!("Unknown highlight style: {}", style)));
