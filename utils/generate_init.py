@@ -76,6 +76,7 @@ to_format_mapping = get_format_mapping(output_only_formats, input_only_formats)
 
 preamble = """# generated programmatically. Do not edit.
 
+from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable
