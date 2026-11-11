@@ -4,6 +4,38 @@ All notable changes to this project are documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+## [2.1.5] - 2026-11-11
+
+### Changed
+
+- Rename the Rust wrapper module to avoid collisions
+- Set the new `disable_native` conversion option to `false` by default
+- Fix Python 3.9 compatibility issues caused by newer annotation syntax
+
+## [2.1.4] - 2026-10-31
+
+### Changed
+
+- Update the underlying `carta` crate to 0.0.13
+
+## [2.1.3] - 2026-10-18
+
+### Changed
+
+- Update CI
+
+## [2.1.2] - 2026-10-17
+
+### Changed
+
+- Update CI
+
+## [2.1.1] - 2026-10-17
+
+### Changed
+
+- Update CI
+
 ## [2.1.0] - 2026-10-13
 
 ### Added
@@ -80,6 +112,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - Separate text and binary conversion results
 
 
+[2.1.5]: https://github.com/g-b-f/cartaPy/compare/2.1.4...HEAD
+[2.1.4]: https://github.com/g-b-f/cartaPy/compare/v2.1.3...2.1.4
+[2.1.3]: https://github.com/g-b-f/cartaPy/compare/v2.1.2...v2.1.3
+[2.1.2]: https://github.com/g-b-f/cartaPy/compare/v2.1.1...v2.1.2
+[2.1.1]: https://github.com/g-b-f/cartaPy/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/g-b-f/cartaPy/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/g-b-f/cartaPy/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/g-b-f/cartaPy/compare/v1.3.0...v2.0.0
