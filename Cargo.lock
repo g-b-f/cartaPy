@@ -117,9 +117,9 @@ checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
 
 [[package]]
 name = "carta"
-version = "0.0.13"
+version = "0.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af498875fbd82631bdb2d0d428dd0295ea14eb997a5be33e470a0ce6d5a56f4f"
+checksum = "4385cf8704db5d9d3c2169098f2d17ed68703f7208a24c0e0494dad4082bcf05"
 dependencies = [
  "carta-ast",
  "carta-core",
@@ -137,9 +137,9 @@ dependencies = [
 
 [[package]]
 name = "carta-ast"
-version = "0.0.13"
+version = "0.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c4eef5d8289219db569d7714b6816a989a7c6e04cf7d73f3eec1dd80b83693c"
+checksum = "687e55d077685d7403c0649f2f59ac776e64feeb4b3bd4089851274a32f1774b"
 dependencies = [
  "compact_str",
  "itoa",
@@ -153,9 +153,9 @@ dependencies = [
 
 [[package]]
 name = "carta-core"
-version = "0.0.13"
+version = "0.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55281028ff00f0d9dd0cfd805127352e1797d857f5fdec9b4ce95ba627752b61"
+checksum = "49fa5581103a8cb87f5782a95bfbe78e0ad1435f5e8b977fb231d954ed263f22"
 dependencies = [
  "carta-ast",
  "carta-highlight",
@@ -167,9 +167,9 @@ dependencies = [
 
 [[package]]
 name = "carta-highlight"
-version = "0.0.13"
+version = "0.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b87e18f3c2abedf20d1a1a1138426fa55d7f0871e47f69dabc48c47bb89633a5"
+checksum = "c57c428d82d621c2edd6106431ac99c7ef406cc06744a5e862a2895e3b694b66"
 dependencies = [
  "fancy-regex",
  "miniz_oxide",
@@ -181,9 +181,9 @@ dependencies = [
 
 [[package]]
 name = "carta-readers"
-version = "0.0.13"
+version = "0.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b58f57f23ba2903a1877998af2995a9150347574caf8d9e5352d65b71f92b64d"
+checksum = "4a896fe90210f6713a7774ddbec7976bd660a4487f1f43d3d9b3c298348e12e5"
 dependencies = [
  "carta-ast",
  "carta-core",
@@ -199,9 +199,9 @@ dependencies = [
 
 [[package]]
 name = "carta-writers"
-version = "0.0.13"
+version = "0.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75b36c8c57a426d3dd5c3de1d7d862774cbf3b35b0b238019bec57bf400671bd"
+checksum = "7ec1a27f3c8c0a80b6fb6540dbccdc3f392f82699027e2f649767ba06ce3f008"
 dependencies = [
  "carta-ast",
  "carta-core",
@@ -344,9 +344,9 @@ dependencies = [
 
 [[package]]
 name = "fancy-regex"
-version = "0.19.0"
+version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "476de73bddf2ef8490aa4ee8f1cf40b430bf1d56c48c22080e5186952cd580e6"
+checksum = "0a2e16b9a584b602f1e0e5e22c30ca0906786088c27500653e432d086def8b53"
 dependencies = [
  "bit-set",
  "regex-automata",

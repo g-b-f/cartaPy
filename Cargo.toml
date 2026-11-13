@@ -15,5 +15,5 @@ default = ["abi3-py39"]
 abi3-py39 = ["pyo3/abi3-py39"]
 
 [dependencies]
-carta = { version = "0.0.13", features = ["read-csv", "read-tsv"] }
+carta = { version = "0.0.14", features = ["read-csv", "read-tsv"] }
 pyo3 = { version = "0.30.1", features = ["extension-module"] }
