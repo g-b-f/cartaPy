@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+## [2.1.6] - 2026-11-12
+
+### Changed
+
+- Update the underlying `carta` crate to 0.0.14
+
 ## [2.1.5] - 2026-11-11
 
 ### Changed

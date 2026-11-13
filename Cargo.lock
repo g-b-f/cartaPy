@@ -212,7 +212,7 @@ dependencies = [
 
 [[package]]
 name = "cartapy"
-version = "2.1.5"
+version = "2.1.6"
 dependencies = [
  "carta",
  "pyo3",
